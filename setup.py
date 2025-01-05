@@ -28,7 +28,7 @@ def get_extensions():
     use_cuda = use_cuda and torch.cuda.is_available() and CUDA_HOME is not None
     extension = CUDAExtension if use_cuda else CppExtension
 
-    extra_link_args = ["libf2c.a", "-lm"]
+    extra_link_args = []
     extra_compile_args = {
         "cxx": [
             "-O3" if not debug_mode else "-O0",
@@ -47,7 +47,6 @@ def get_extensions():
     this_dir = os.path.dirname(os.path.curdir)
     extensions_dir = os.path.join(this_dir, library_name, "csrc")
     sources = list(glob.glob(os.path.join(extensions_dir, "*.cpp")))
-    sources += list(glob.glob(os.path.join(extensions_dir, "cbesk", "*.cpp")))
 
     extensions_cuda_dir = os.path.join(extensions_dir, "cuda")
     cuda_sources = list(glob.glob(os.path.join(extensions_cuda_dir, "*.cu")))

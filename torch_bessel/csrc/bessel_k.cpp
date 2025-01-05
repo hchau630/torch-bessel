@@ -2,42 +2,11 @@
 #include <ATen/TensorIterator.h>
 #include <ATen/native/cpu/Loops.h>
 #include <c10/util/complex.h>
-#include "bessel.h"
 
-#include <vector>
+#include "bessel.h"
+#include "iterator.h"
 
 namespace torch_bessel {
-
-at::TensorIterator build_iterator(const at::Tensor& result, const at::Tensor& v, const at::Tensor& z) {
-  return (
-    at::TensorIteratorConfig()
-    .set_check_mem_overlap(true)
-    .allow_cpu_scalars(true)
-    .promote_inputs_to_common_dtype(true)
-    .cast_common_dtype_to_outputs(true)
-    .enforce_safe_casting_to_output(true)
-    .promote_integer_inputs_to_float(true)
-    .add_output(result)
-    .add_input(v)
-    .add_input(z)
-  ).build();
-}
-
-at::TensorIterator build_iterator_2(const at::Tensor& result1, const at::Tensor& result2, const at::Tensor& v, const at::Tensor& z) {
-  return (
-    at::TensorIteratorConfig()
-    .set_check_mem_overlap(true)
-    .allow_cpu_scalars(true)
-    .promote_inputs_to_common_dtype(true)
-    .cast_common_dtype_to_outputs(true)
-    .enforce_safe_casting_to_output(true)
-    .promote_integer_inputs_to_float(true)
-    .add_output(result1)
-    .add_output(result2)
-    .add_input(v)
-    .add_input(z)
-  ).build();
-}
 
 at::Tensor bessel_k_forward_cpu(const at::Tensor& v, const at::Tensor& z) {
   TORCH_INTERNAL_ASSERT(v.device().type() == at::DeviceType::CPU);
@@ -77,7 +46,7 @@ TORCH_LIBRARY(torch_bessel, m) {
   m.def("bessel_k_forward_backward(Tensor nu, Tensor z) -> (Tensor, Tensor)");
 }
 
-// Registers CPU implementations for besselk
+// Registers CPU implementations for bessel_k
 TORCH_LIBRARY_IMPL(torch_bessel, CPU, m) {
   m.impl("bessel_k_forward", &bessel_k_forward_cpu);
   m.impl("bessel_k_forward_backward", &bessel_k_forward_backward_cpu);

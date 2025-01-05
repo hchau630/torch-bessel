@@ -59,32 +59,3 @@ def _setup_context(ctx, inputs, output):
 torch.library.register_autograd(
     "torch_bessel::bessel_k_forward_backward", _backward, setup_context=_setup_context
 )
-
-
-# def _backward(ctx, grad):
-#     grad_v, grad_z = None, None
-#     if ctx.needs_input_grad[0]:
-#         raise NotImplementedError("gradient of BesselK w.r.t nu is not implemented.")
-#     if ctx.needs_input_grad[1]:
-#         v, z, output = ctx.saved_tensors
-#         # dK_v(z)dz = -K_{v-1}(z) - v/z * K_v(z)
-#         grad_z = -torch.ops.torch_bessel.bessel_k_forward.default(v - 1, z) - v / z * output
-#         # conjugate the gradient for complex inputs, to understand this
-#         # see https://pytorch.org/docs/stable/notes/autograd.html#complex-autograd-doc
-#         grad_z = grad_z.conj().mul_(grad)
-#     return grad_v, grad_z
-
-
-# def _setup_context(ctx, inputs, output):
-#     if ctx.needs_input_grad[0]:
-#         raise NotImplementedError("gradient of BesselK w.r.t nu is not implemented.")
-#     if ctx.needs_input_grad[1]:
-#         ctx.save_for_backward(*inputs, output)
-
-
-# # This adds training support for the operator. You must provide us
-# # the backward formula for the operator and a `setup_context` function
-# # to save values to be used in the backward.
-# torch.library.register_autograd(
-#     "torch_bessel::bessel_k_forward", _backward, setup_context=_setup_context
-# )

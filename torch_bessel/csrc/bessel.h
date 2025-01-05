@@ -67,7 +67,8 @@ inline C10_HOST_DEVICE c10::complex<float> bessel_k_forward(float v, c10::comple
 }
 
 inline C10_HOST_DEVICE std::tuple<c10::complex<float>, c10::complex<float>> bessel_k_forward_backward(float v, c10::complex<float> z) {
-    return static_cast<std::tuple<c10::complex<float>, c10::complex<float>>>(bessel_k_forward(static_cast<double>(v), static_cast<c10::complex<double>>(z)));
+    auto out = bessel_k_forward(static_cast<double>(v), static_cast<c10::complex<double>>(z));
+    return std::make_tuple(static_cast<c10::complex<float>>(std::get<0>(out)), static_cast<c10::complex<float>>(std::get<1>(out)));
 }
 
 template <typename T>

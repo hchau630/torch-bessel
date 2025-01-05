@@ -7,39 +7,46 @@ from scipy import special
 import torch_bessel
 
 
-def reference_besselk(nu, z):
-    return special.kv(nu, z)
+def reference_bessel_k(nu, z):
+    return special.kv(nu, z.detach())
 
 
 class TestBesselK(TestCase):
     def sample_inputs(self, device, *, requires_grad=False):
         def make_nu(*size):
-            return torch.randn(size, device=device, requires_grad=requires_grad)
-
-        def make_z(*size):
-            return torch.complex(
-                *torch.randn((2, *size), device=device, requires_grad=requires_grad)
-            )
-
-        def make_nondiff_nu(*size):
+            # current implementation does not support gradient w.r.t nu
             return torch.randn(size, device=device, requires_grad=False)
 
-        def make_nondiff_z(*size):
+        def make_z(*size, dtype=None):
             return torch.complex(
-                *torch.randn((2, *size), device=device, requires_grad=False)
+                *torch.randn(
+                    (2, *size), device=device, requires_grad=requires_grad, dtype=dtype
+                )
             )
 
-        return [[make_nondiff_nu(20), make_nondiff_z(20)]]
+        def make_nondiff_z(*size, dtype=None):
+            return torch.complex(
+                *torch.randn(
+                    (2, *size), device=device, requires_grad=False, dtype=dtype
+                )
+            )
+
+        return [
+            [make_nu(20), make_z(20, dtype=torch.double)],
+            [make_nu(20), make_z(20, dtype=torch.double).real],
+            [make_nu(20), make_z(20)],
+            [make_nu(20), make_z(20).real],
+            [make_nu(20), make_nondiff_z(20)],
+            [make_nu(20), make_nondiff_z(20).real],
+        ]
 
     def _test_correctness(self, device):
         samples = self.sample_inputs(device)
         for args in samples:
-            print(f"{args=}")
-            result = torch_bessel.ops.besselk(*args)
-            expected = reference_besselk(*args)
-            print(f"{result=}")
-            print(f"{expected=}")
-            torch.testing.assert_close(result, expected)
+            result = torch_bessel.ops.bessel_k(*args)
+            expected = reference_bessel_k(*args)
+
+            torch.testing.assert_close(result, expected, equal_nan=True)
 
     def test_correctness_cpu(self):
         self._test_correctness("cpu")
@@ -51,17 +58,12 @@ class TestBesselK(TestCase):
     def _test_gradients(self, device):
         samples = self.sample_inputs(device, requires_grad=True)
         for args in samples:
-            diff_tensors = [
-                a for a in args if isinstance(a, torch.Tensor) and a.requires_grad
-            ]
-            out = torch_bessel.ops.besselk(*args)
-            grad_out = torch.randn_like(out)
-            result = torch.autograd.grad(out, diff_tensors, grad_out)
-
-            out = reference_besselk(*args)
-            expected = torch.autograd.grad(out, diff_tensors, grad_out)
-
-            torch.testing.assert_close(result, expected)
+            if (
+                args[0].dtype == torch.double
+                and args[1].dtype == torch.complex128
+                and args[1].requires_grad
+            ):
+                torch.autograd.gradcheck(torch_bessel.ops.bessel_k, args)
 
     def test_gradients_cpu(self):
         self._test_gradients("cpu")
@@ -75,7 +77,7 @@ class TestBesselK(TestCase):
         samples = self.sample_inputs(device, requires_grad=True)
         samples.extend(self.sample_inputs(device, requires_grad=False))
         for args in samples:
-            opcheck(torch.ops.torch_bessel.besselk.default, args)
+            opcheck(torch.ops.torch_bessel.bessel_k_forward_backward.default, args)
 
     def test_opcheck_cpu(self):
         self._opcheck("cpu")

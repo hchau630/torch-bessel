@@ -6,7 +6,7 @@ import torch_bessel
 
 def main():
     nu, z = torch.tensor(-1.0), torch.tensor(2.0) + 0j
-    print(torch_bessel.ops.besselk(nu, z))
+    print(torch_bessel.ops.bessel_k(nu, z))
     print(special.kv(nu, z))
 
 

@@ -13,9 +13,9 @@ def reference_bessel_k(nu, z):
 
 class TestBesselK(TestCase):
     def sample_inputs(self, device, *, requires_grad=False):
-        def make_nu(*size):
+        def make_nu(*size, dtype=None):
             # current implementation does not support gradient w.r.t nu
-            return torch.randn(size, device=device, requires_grad=False)
+            return torch.randn(size, device=device, requires_grad=False, dtype=dtype)
 
         def make_z(*size, dtype=None):
             return torch.complex(
@@ -32,6 +32,8 @@ class TestBesselK(TestCase):
             )
 
         return [
+            [make_nu(5, dtype=torch.double), make_z(5, dtype=torch.double)],
+            [make_nu(5, dtype=torch.double), make_z(5, dtype=torch.double).abs()],
             [make_nu(20), make_z(20, dtype=torch.double)],
             [make_nu(20), make_z(20, dtype=torch.double).real],
             [make_nu(20), make_z(20)],
@@ -60,7 +62,7 @@ class TestBesselK(TestCase):
         for args in samples:
             if (
                 args[0].dtype == torch.double
-                and args[1].dtype == torch.complex128
+                and args[1].dtype in {torch.double, torch.complex128}
                 and args[1].requires_grad
             ):
                 torch.autograd.gradcheck(torch_bessel.ops.bessel_k, args)

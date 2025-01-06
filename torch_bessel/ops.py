@@ -42,7 +42,7 @@ def _backward(ctx, grad, _):
     if ctx.needs_input_grad[0]:
         raise NotImplementedError("gradient of bessel_k w.r.t nu is not implemented.")
     if ctx.needs_input_grad[1]:
-        grad_z = ctx.saved_tensors[0] * grad
+        grad_z = grad * ctx.saved_tensors[0]
     return grad_v, grad_z
 
 

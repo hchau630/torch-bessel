@@ -96,34 +96,35 @@
 
 #include <math.h>
 #include <c10/util/complex.h>
+#include <c10/macros/Macros.h>
 
 namespace amos {
 
-int acai(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double, double);
-int acon(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double, double, double);
-int asyi(c10::complex<double>, double, int, int, c10::complex<double> *, double, double, double, double);
-int binu(c10::complex<double>, double fnu, int, int, c10::complex<double> *, double, double, double, double, double);
-int bknu(c10::complex<double>, double, int, int, c10::complex<double> *, double, double, double);
-int buni(c10::complex<double>, double, int, int, c10::complex<double> *, int, int *, double, double, double, double);
-int bunk(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
-double gamln(double);
-int kscl(c10::complex<double>, double, int, c10::complex<double> *, c10::complex<double>, double *, double, double);
-int mlri(c10::complex<double>, double, int, int, c10::complex<double> *, double);
-void rati(c10::complex<double>, double, int, c10::complex<double> *, double);
-int seri(c10::complex<double>, double, int, int, c10::complex<double> *, double, double, double);
-int s1s2(c10::complex<double>, c10::complex<double> *, c10::complex<double> *, double, double, int *);
-int uchk(c10::complex<double>, double, double);
-void unhj(c10::complex<double>, double, int, double, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *);
-void uni1(c10::complex<double>, double, int, int, c10::complex<double> *, int *, int *, double, double, double, double);
-void uni2(c10::complex<double>, double, int, int, c10::complex<double> *, int *, int *, double, double, double, double);
-void unik(c10::complex<double>, double, int, int, double, int *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *);
-int unk1(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
-int unk2(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
-int uoik(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
-int wrsk(c10::complex<double>, double, int, int, c10::complex<double> *, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE int acai(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double, double);
+C10_HOST_DEVICE int acon(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double, double, double);
+C10_HOST_DEVICE int asyi(c10::complex<double>, double, int, int, c10::complex<double> *, double, double, double, double);
+C10_HOST_DEVICE int binu(c10::complex<double>, double fnu, int, int, c10::complex<double> *, double, double, double, double, double);
+C10_HOST_DEVICE int bknu(c10::complex<double>, double, int, int, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE int buni(c10::complex<double>, double, int, int, c10::complex<double> *, int, int *, double, double, double, double);
+C10_HOST_DEVICE int bunk(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE double gamln(double);
+C10_HOST_DEVICE int kscl(c10::complex<double>, double, int, c10::complex<double> *, c10::complex<double>, double *, double, double);
+C10_HOST_DEVICE int mlri(c10::complex<double>, double, int, int, c10::complex<double> *, double);
+C10_HOST_DEVICE void rati(c10::complex<double>, double, int, c10::complex<double> *, double);
+C10_HOST_DEVICE int seri(c10::complex<double>, double, int, int, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE int s1s2(c10::complex<double>, c10::complex<double> *, c10::complex<double> *, double, double, int *);
+C10_HOST_DEVICE int uchk(c10::complex<double>, double, double);
+C10_HOST_DEVICE void unhj(c10::complex<double>, double, int, double, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *);
+C10_HOST_DEVICE void uni1(c10::complex<double>, double, int, int, c10::complex<double> *, int *, int *, double, double, double, double);
+C10_HOST_DEVICE void uni2(c10::complex<double>, double, int, int, c10::complex<double> *, int *, int *, double, double, double, double);
+C10_HOST_DEVICE void unik(c10::complex<double>, double, int, int, double, int *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *, c10::complex<double> *);
+C10_HOST_DEVICE int unk1(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE int unk2(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE int uoik(c10::complex<double>, double, int, int, int, c10::complex<double> *, double, double, double);
+C10_HOST_DEVICE int wrsk(c10::complex<double>, double, int, int, c10::complex<double> *, c10::complex<double> *, double, double, double);
 
 
-constexpr double d1mach[5] = {
+C10_HOST_DEVICE constexpr double d1mach[5] = {
     2.2250738585072014e-308,  /* np.finfo(np.float64).tiny      */
     1.7976931348623157e+308,  /* np.finfo(np.float64).max       */
     1.1102230246251565e-16,   /* 0.5 * np.finfo(np.float64).eps */
@@ -131,7 +132,7 @@ constexpr double d1mach[5] = {
     0.3010299956639812        /* np.log10(2)                    */
 };
 
-constexpr double i1mach[16] = {
+C10_HOST_DEVICE constexpr double i1mach[16] = {
     5,           /* standard input         */
     6,           /* standard output        */
     7,           /* standard punch         */
@@ -150,21 +151,21 @@ constexpr double i1mach[16] = {
     1024         /* DBL_MAX_EXP;           */
 };
 
-constexpr double zunhj_ar[14] = {
+C10_HOST_DEVICE constexpr double zunhj_ar[14] = {
     1.00000000000000000e+00, 1.04166666666666667e-01, 8.35503472222222222e-02, 1.28226574556327160e-01,      //  0
     2.91849026464140464e-01, 8.81627267443757652e-01, 3.32140828186276754e+00, 1.49957629868625547e+01,      //  4
     7.89230130115865181e+01, 4.74451538868264323e+02, 3.20749009089066193e+03, 2.40865496408740049e+04,      //  8
     1.98923119169509794e+05, 1.79190200777534383e+06                                                         // 12
 };
 
-constexpr double zunhj_br[14] = {
+C10_HOST_DEVICE constexpr double zunhj_br[14] = {
      1.00000000000000000e+00, -1.45833333333333333e-01, -9.87413194444444444e-02, -1.43312053915895062e-01,  //  0
     -3.17227202678413548e-01, -9.42429147957120249e-01, -3.51120304082635426e+00, -1.57272636203680451e+01,  //  4
     -8.22814390971859444e+01, -4.92355370523670524e+02, -3.31621856854797251e+03, -2.48276742452085896e+04,  //  8
     -2.04526587315129788e+05, -1.83844491706820990e+06                                                       // 12
 };
 
-constexpr double  zunhj_c[105] = {
+C10_HOST_DEVICE constexpr double  zunhj_c[105] = {
      1.00000000000000000e+00, -2.08333333333333333e-01,  1.25000000000000000e-01,  3.34201388888888889e-01,  //   0
     -4.01041666666666667e-01,  7.03125000000000000e-02, -1.02581259645061728e+00,  1.84646267361111111e+00,  //   4
     -8.91210937500000000e-01,  7.32421875000000000e-02,  4.66958442342624743e+00, -1.12070026162229938e+01,  //   8
@@ -194,7 +195,7 @@ constexpr double  zunhj_c[105] = {
      1.82577554742931747e+04                                                                                 // 104
 };
 
-constexpr double zunhj_alfa[180] = {
+C10_HOST_DEVICE constexpr double zunhj_alfa[180] = {
     -4.44444444444444444e-03, -9.22077922077922078e-04, -8.84892884892884893e-05,  1.65927687832449737e-04,  //   0
      2.46691372741792910e-04,  2.65995589346254780e-04,  2.61824297061500945e-04,  2.48730437344655609e-04,  //   4
      2.32721040083232098e-04,  2.16362485712365082e-04,  2.00738858762752355e-04,  1.86267636637545172e-04,  //   8
@@ -242,7 +243,7 @@ constexpr double zunhj_alfa[180] = {
      3.24724948503090564e-04,  2.20342042730246599e-04,  1.28412898401353882e-04,  4.82005924552095464e-05   // 176
 };
 
-constexpr double zunhj_beta[210] = {
+C10_HOST_DEVICE constexpr double zunhj_beta[210] = {
      1.79988721413553309e-02,  5.59964911064388073e-03,  2.88501402231132779e-03,  1.80096606761053941e-03,  //   0
      1.24753110589199202e-03,  9.22878876572938311e-04,  7.14430421727287357e-04,  5.71787281789704872e-04,  //   4
      4.69431007606481533e-04,  3.93232835462916638e-04,  3.34818889318297664e-04,  2.88952148495751517e-04,  //   8
@@ -298,7 +299,7 @@ constexpr double zunhj_beta[210] = {
      1.59690280765839059e-03,  1.42111975664438546e-03                                                       // 208
 };
 
-constexpr double zunhj_gama[30] = {
+C10_HOST_DEVICE constexpr double zunhj_gama[30] = {
     6.29960524947436582e-01, 2.51984209978974633e-01, 1.54790300415655846e-01, 1.10713062416159013e-01,      //  0
     8.57309395527394825e-02, 6.97161316958684292e-02, 5.86085671893713576e-02, 5.04698873536310685e-02,      //  4
     4.42600580689154809e-02, 3.93720661543509966e-02, 3.54283195924455368e-02, 3.21818857502098231e-02,      //  8
@@ -309,7 +310,7 @@ constexpr double zunhj_gama[30] = {
     1.22761545318762767e-02, 1.18338262398482403e-02                                                         // 28
 };
 
-constexpr double zunik_c[120] = {
+C10_HOST_DEVICE constexpr double zunik_c[120] = {
      1.00000000000000000e+00, -2.08333333333333333e-01,  1.25000000000000000e-01,  3.34201388888888889e-01,  //   0
     -4.01041666666666667e-01,  7.03125000000000000e-02, -1.02581259645061728e+00,  1.84646267361111111e+00,  //   4
     -8.91210937500000000e-01,  7.32421875000000000e-02,  4.66958442342624743e+00, -1.12070026162229938e+01,  //   8
@@ -342,7 +343,7 @@ constexpr double zunik_c[120] = {
     -2.18229277575292237e+10,  1.24700929351271032e+09, -2.91883881222208134e+07,  1.18838426256783253e+05   // 116
 };
 
-constexpr double dgamln_gln[100] = {
+C10_HOST_DEVICE constexpr double dgamln_gln[100] = {
     0.00000000000000000e+00, 0.00000000000000000e+00, 6.93147180559945309e-01, 1.79175946922805500e+00,      //   0
     3.17805383034794562e+00, 4.78749174278204599e+00, 6.57925121201010100e+00, 8.52516136106541430e+00,      //   4
     1.06046029027452502e+01, 1.28018274800814696e+01, 1.51044125730755153e+01, 1.75023078458738858e+01,      //   8
@@ -370,7 +371,7 @@ constexpr double dgamln_gln[100] = {
     3.45379407062266854e+02, 3.49954118040770237e+02, 3.54539085519440809e+02, 3.59134205369575399e+02       //  96
 };
 
-constexpr double dgamln_cf[22] = {
+C10_HOST_DEVICE constexpr double dgamln_cf[22] = {
     8.33333333333333333e-02, -2.77777777777777778e-03, 7.93650793650793651e-04, -5.95238095238095238e-04,    //  0
     8.41750841750841751e-04, -1.91752691752691753e-03, 6.41025641025641026e-03, -2.95506535947712418e-02,    //  4
     1.79644372368830573e-01, -1.39243221690590112e+00, 1.34028640441683920e+01, -1.56848284626002017e+02,    //  8
@@ -380,7 +381,7 @@ constexpr double dgamln_cf[22] = {
 };
 
 
-inline int acai(
+inline C10_HOST_DEVICE int acai(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -485,7 +486,7 @@ inline int acai(
 }
 
 
-inline int acon(
+inline C10_HOST_DEVICE int acon(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -647,7 +648,7 @@ inline int acon(
 }
 
 
-inline c10::complex<double> airy(
+inline C10_HOST_DEVICE c10::complex<double> airy(
     c10::complex<double> z,
     int id,
     int kode,
@@ -994,7 +995,7 @@ inline c10::complex<double> airy(
 }
 
 
-inline int asyi(
+inline C10_HOST_DEVICE int asyi(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -1123,7 +1124,7 @@ inline int asyi(
 }
 
 
-inline int besh(
+inline C10_HOST_DEVICE int besh(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -1467,7 +1468,7 @@ inline int besh(
 }
 
 
-inline int besi(
+inline C10_HOST_DEVICE int besi(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -1728,7 +1729,7 @@ inline int besi(
 }
 
 
-inline int besj(
+inline C10_HOST_DEVICE int besj(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -1984,7 +1985,7 @@ inline int besj(
 }
 
 
-inline int besk(
+inline C10_HOST_DEVICE int besk(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -2290,7 +2291,7 @@ inline int besk(
 }
 
 
-inline int besy(
+inline C10_HOST_DEVICE int besy(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -2535,7 +2536,7 @@ inline int besy(
 }
 
 
-inline int binu(
+inline C10_HOST_DEVICE int binu(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -2686,7 +2687,7 @@ inline int binu(
 }
 
 
-inline c10::complex<double> biry(
+inline C10_HOST_DEVICE c10::complex<double> biry(
     c10::complex<double> z,
     int id,
     int kode,
@@ -3007,7 +3008,7 @@ inline c10::complex<double> biry(
 }
 
 
-inline int bknu(
+inline C10_HOST_DEVICE int bknu(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -3472,7 +3473,7 @@ L190:
 }
 
 
-inline int buni(
+inline C10_HOST_DEVICE int buni(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -3635,7 +3636,7 @@ inline int buni(
 }
 
 
-inline int bunk(
+inline C10_HOST_DEVICE int bunk(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -3680,7 +3681,7 @@ inline int bunk(
 }
 
 
-inline double gamln(double z) {
+inline C10_HOST_DEVICE double gamln(double z) {
 
     //***BEGIN PROLOGUE  DGAMLN
     //***DATE WRITTEN   830501   (YYMMDD)
@@ -3780,7 +3781,7 @@ inline double gamln(double z) {
 }
 
 
-inline int mlri(
+inline C10_HOST_DEVICE int mlri(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -3951,7 +3952,7 @@ inline int mlri(
 }
 
 
-inline int kscl(
+inline C10_HOST_DEVICE int kscl(
     c10::complex<double> zr,
     double fnu,
     int n,
@@ -4068,7 +4069,7 @@ inline int kscl(
 }
 
 
-inline void rati(
+inline C10_HOST_DEVICE void rati(
     c10::complex<double> z,
     double fnu,
     int n,
@@ -4183,7 +4184,7 @@ inline void rati(
 }
 
 
-inline int seri(
+inline C10_HOST_DEVICE int seri(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -4353,7 +4354,7 @@ L100:
 }
 
 
-inline int s1s2(
+inline C10_HOST_DEVICE int s1s2(
     c10::complex<double> zr,
     c10::complex<double> *s1,
     c10::complex<double> *s2,
@@ -4410,7 +4411,7 @@ inline int s1s2(
 }
 
 
-inline int uchk(
+inline C10_HOST_DEVICE int uchk(
     c10::complex<double> y,
     double ascle,
     double tol
@@ -4447,7 +4448,7 @@ inline int uchk(
 }
 
 
-inline void unhj(
+inline C10_HOST_DEVICE void unhj(
     c10::complex<double> z,
     double fnu,
     int ipmtr,
@@ -4752,7 +4753,7 @@ inline void unhj(
 }
 
 
-inline void uni1(
+inline C10_HOST_DEVICE void uni1(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -4913,7 +4914,7 @@ L110:
 }
 
 
-inline void uni2(
+inline C10_HOST_DEVICE void uni2(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -5132,7 +5133,7 @@ L50:
 }
 
 
-inline void unik(
+inline C10_HOST_DEVICE void unik(
     c10::complex<double> zr,
     double fnu,
     int ikflg,
@@ -5250,7 +5251,7 @@ inline void unik(
 }
 
 
-inline int unk1(
+inline C10_HOST_DEVICE int unk1(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -5582,7 +5583,7 @@ L130:
 }
 
 
-inline int unk2(
+inline C10_HOST_DEVICE int unk2(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -5983,7 +5984,7 @@ L250:
 }
 
 
-inline int uoik(
+inline C10_HOST_DEVICE int uoik(
     c10::complex<double> z,
     double fnu,
     int kode,
@@ -6143,7 +6144,7 @@ inline int uoik(
 }
 
 
-inline int wrsk(
+inline C10_HOST_DEVICE int wrsk(
     c10::complex<double> zr,
     double fnu,
     int kode,

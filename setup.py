@@ -33,10 +33,12 @@ def get_extensions():
         "cxx": [
             "-O3" if not debug_mode else "-O0",
             "-fdiagnostics-color=always",
+            "-w",
         ],
         "nvcc": [
             "-O3" if not debug_mode else "-O0",
             "--extended-lambda",
+            "-w",
         ],
     }
     if debug_mode:

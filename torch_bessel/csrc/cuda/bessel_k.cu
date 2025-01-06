@@ -3,6 +3,7 @@
 #include <ATen/native/cuda/Loops.cuh>
 #include <c10/util/complex.h>
 
+#include <iostream>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <thrust/tuple.h>

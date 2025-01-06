@@ -8,7 +8,8 @@ import torch_bessel
 
 
 def reference_bessel_k(nu, z):
-    return special.kv(nu, z.detach())
+    device = z.device
+    return special.kv(nu.cpu(), z.detach().cpu()).to(device)
 
 
 class TestBesselK(TestCase):
@@ -47,7 +48,6 @@ class TestBesselK(TestCase):
         for args in samples:
             result = torch_bessel.ops.bessel_k(*args)
             expected = reference_bessel_k(*args)
-
             torch.testing.assert_close(result, expected, equal_nan=True)
 
     def test_correctness_cpu(self):

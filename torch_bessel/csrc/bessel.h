@@ -3,6 +3,7 @@
 #include <iostream>
 #include <c10/macros/Macros.h>
 #include <c10/util/complex.h>
+#include <thrust/tuple.h>
 #include "amos.h"
 
 
@@ -62,6 +63,37 @@ inline C10_HOST_DEVICE std::tuple<c10::complex<double>, c10::complex<double>> be
     return std::make_tuple(cy[0], cy[1]);
 }
 
+inline C10_HOST_DEVICE thrust::tuple<c10::complex<double>, c10::complex<double>> bessel_k_forward_backward_cuda_(double v, c10::complex<double> z) {
+    c10::complex<double> cy[2] = {c10::complex<double>(NAN, NAN), c10::complex<double>(NAN, NAN)};
+    if (std::isnan(v) || std::isnan(std::real(z)) || isnan(std::imag(z))) {
+        return thrust::tuple(cy[0], cy[1]);
+    }
+
+    if (v < 0) {
+        /* K_v == K_{-v} even for non-integer v */
+        v = -v;
+    }
+
+    int n = 2;
+    int kode = 1;
+    int ierr;
+    int nz = amos::besk(z, v, kode, n, cy, &ierr);
+
+    /* dK_v(z)/dz = v/z * K_v(z) - K_{v+1}(z), conjugation
+       needed for PyTorch gradient computation */
+    cy[1] = std::conj(v / z * cy[0] - cy[1]);
+
+    if (ierr == 2) {
+        if (std::real(z) >= 0 && std::imag(z) == 0) {
+            /* overflow */
+            cy[0] = INFINITY;
+            cy[1] = INFINITY;
+        }
+    }
+
+    return thrust::tuple(cy[0], cy[1]);
+}
+
 inline C10_HOST_DEVICE c10::complex<float> bessel_k_forward(float v, c10::complex<float> z) {
     return static_cast<c10::complex<float>>(bessel_k_forward(static_cast<double>(v), static_cast<c10::complex<double>>(z)));
 }
@@ -69,6 +101,11 @@ inline C10_HOST_DEVICE c10::complex<float> bessel_k_forward(float v, c10::comple
 inline C10_HOST_DEVICE std::tuple<c10::complex<float>, c10::complex<float>> bessel_k_forward_backward(float v, c10::complex<float> z) {
     auto out = bessel_k_forward_backward(static_cast<double>(v), static_cast<c10::complex<double>>(z));
     return std::make_tuple(static_cast<c10::complex<float>>(std::get<0>(out)), static_cast<c10::complex<float>>(std::get<1>(out)));
+}
+
+inline C10_HOST_DEVICE thrust::tuple<c10::complex<float>, c10::complex<float>> bessel_k_forward_backward_cuda_(float v, c10::complex<float> z) {
+    auto out = bessel_k_forward_backward_cuda_(static_cast<double>(v), static_cast<c10::complex<double>>(z));
+    return thrust::tuple(static_cast<c10::complex<float>>(thrust::get<0>(out)), static_cast<c10::complex<float>>(thrust::get<1>(out)));
 }
 
 template <typename T>
@@ -113,3 +150,26 @@ inline C10_HOST_DEVICE std::tuple<T, T> bessel_k_forward_backward(T v, T z) {
     auto out = bessel_k_forward_backward(v, c10::complex(z));
     return std::make_tuple(std::real(std::get<0>(out)), std::real(std::get<1>(out)));
 }
+
+template <typename T>
+inline C10_HOST_DEVICE thrust::tuple<T, T> bessel_k_forward_backward_cuda_(T v, T z) {
+    if (z < 0) {
+        return thrust::tuple(std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN());
+    }
+
+    if (z == 0) {
+        return thrust::tuple(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity());
+    }
+
+    if (z > 710 * (1 + std::abs(v))) {
+        /* Underflow. See uniform expansion https://dlmf.nist.gov/10.41
+         * This condition is not a strict bound (it can underflow earlier),
+         * rather, we are here working around a restriction in AMOS.
+         */
+        return thrust::tuple(0, 0);
+    }
+
+    auto out = bessel_k_forward_backward_cuda_(v, c10::complex(z));
+    return thrust::tuple(std::real(thrust::get<0>(out)), std::real(thrust::get<1>(out)));
+}
+

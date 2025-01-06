@@ -5,6 +5,7 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <thrust/tuple.h>
 
 #include "../bessel.h"
 #include "../iterator.h"
@@ -33,8 +34,8 @@ std::tuple<at::Tensor, at::Tensor> bessel_k_forward_backward_cuda(const at::Tens
   at::Tensor result2 = torch::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
   at::TensorIterator iter = build_iterator_2(result1, result2, v, z);
   AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(iter.common_dtype(), "bessel_k_forward_backward_cuda", [&]() {
-    at::native::gpu_kernel_multiple_outputs(iter, []GPU_LAMBDA(scalar_t v, scalar_t z) -> std::tuple<scalar_t, scalar_t> {
-        return bessel_k_forward_backward(std::real(v), z);
+    at::native::gpu_kernel_multiple_outputs(iter, []GPU_LAMBDA(scalar_t v, scalar_t z) -> thrust::tuple<scalar_t, scalar_t> {
+        return bessel_k_forward_backward_cuda_(std::real(v), z);
     });
   });
   return std::make_tuple(result1, result2);

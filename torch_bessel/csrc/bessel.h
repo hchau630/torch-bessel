@@ -66,7 +66,7 @@ inline C10_HOST_DEVICE std::tuple<c10::complex<double>, c10::complex<double>> be
 inline C10_HOST_DEVICE thrust::tuple<c10::complex<double>, c10::complex<double>> bessel_k_forward_backward_cuda_(double v, c10::complex<double> z) {
     c10::complex<double> cy[2] = {c10::complex<double>(NAN, NAN), c10::complex<double>(NAN, NAN)};
     if (std::isnan(v) || std::isnan(std::real(z)) || isnan(std::imag(z))) {
-        return thrust::tuple(cy[0], cy[1]);
+        return thrust::make_tuple(cy[0], cy[1]);
     }
 
     if (v < 0) {
@@ -91,7 +91,7 @@ inline C10_HOST_DEVICE thrust::tuple<c10::complex<double>, c10::complex<double>>
         }
     }
 
-    return thrust::tuple(cy[0], cy[1]);
+    return thrust::make_tuple(cy[0], cy[1]);
 }
 
 inline C10_HOST_DEVICE c10::complex<float> bessel_k_forward(float v, c10::complex<float> z) {
@@ -105,7 +105,7 @@ inline C10_HOST_DEVICE std::tuple<c10::complex<float>, c10::complex<float>> bess
 
 inline C10_HOST_DEVICE thrust::tuple<c10::complex<float>, c10::complex<float>> bessel_k_forward_backward_cuda_(float v, c10::complex<float> z) {
     auto out = bessel_k_forward_backward_cuda_(static_cast<double>(v), static_cast<c10::complex<double>>(z));
-    return thrust::tuple(static_cast<c10::complex<float>>(thrust::get<0>(out)), static_cast<c10::complex<float>>(thrust::get<1>(out)));
+    return thrust::make_tuple(static_cast<c10::complex<float>>(thrust::get<0>(out)), static_cast<c10::complex<float>>(thrust::get<1>(out)));
 }
 
 template <typename T>
@@ -154,11 +154,11 @@ inline C10_HOST_DEVICE std::tuple<T, T> bessel_k_forward_backward(T v, T z) {
 template <typename T>
 inline C10_HOST_DEVICE thrust::tuple<T, T> bessel_k_forward_backward_cuda_(T v, T z) {
     if (z < 0) {
-        return thrust::tuple(std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN());
+        return thrust::make_tuple(std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN());
     }
 
     if (z == 0) {
-        return thrust::tuple(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity());
+        return thrust::make_tuple(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity());
     }
 
     if (z > 710 * (1 + std::abs(v))) {
@@ -166,10 +166,10 @@ inline C10_HOST_DEVICE thrust::tuple<T, T> bessel_k_forward_backward_cuda_(T v, 
          * This condition is not a strict bound (it can underflow earlier),
          * rather, we are here working around a restriction in AMOS.
          */
-        return thrust::tuple(0, 0);
+        return thrust::make_tuple(0, 0);
     }
 
     auto out = bessel_k_forward_backward_cuda_(v, c10::complex(z));
-    return thrust::tuple(std::real(thrust::get<0>(out)), std::real(thrust::get<1>(out)));
+    return thrust::make_tuple(std::real(thrust::get<0>(out)), std::real(thrust::get<1>(out)));
 }
 

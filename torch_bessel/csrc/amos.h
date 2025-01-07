@@ -105,34 +105,6 @@ C10_HOST_DEVICE int bknu0(c10::complex<double>, int, c10::complex<double> *, dou
 C10_HOST_DEVICE int kscl0(c10::complex<double>, int, c10::complex<double> *, c10::complex<double>, double *, double, double);
 C10_HOST_DEVICE int uchk(c10::complex<double>, double, double);
 
-
-C10_HOST_DEVICE constexpr double d1mach[5] = {
-    2.2250738585072014e-308,  /* np.finfo(np.float64).tiny      */
-    1.7976931348623157e+308,  /* np.finfo(np.float64).max       */
-    1.1102230246251565e-16,   /* 0.5 * np.finfo(np.float64).eps */
-    2.220446049250313e-16,    /* np.finfo(np.float64).eps       */
-    0.3010299956639812        /* np.log10(2)                    */
-};
-
-C10_HOST_DEVICE constexpr double i1mach[16] = {
-    5,           /* standard input         */
-    6,           /* standard output        */
-    7,           /* standard punch         */
-    0,           /* standard error         */
-    32,          /* bits per integer       */
-    4,           /* sizeof(int);           */
-    2,           /* base for integers      */
-    31,          /* digits of integer base */
-    2147483647,  /* LONG MAX 2**31 - 1     */
-    2,           /* FLT_RADIX;             */
-    24,          /* FLT_MANT_DIG;          */
-    -126,        /* FLT_MIN_EXP;           */
-    128,         /* FLT_MAX_EXP;           */
-    53,          /* DBL_MANT_DIG;          */
-    -1021,       /* DBL_MIN_EXP;           */
-    1024         /* DBL_MAX_EXP;           */
-};
-
 inline C10_HOST_DEVICE int besk0(
     c10::complex<double> z,
     int n,

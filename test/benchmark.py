@@ -47,16 +47,21 @@ def main():
                 *torch.randn((2, options.n), **kwargs, requires_grad=options.backward)
             ),
         )
-
+        
+        torch.cuda.synchronize()
         start = time.time()
         out = func(*args)
+        torch.cuda.synchronize()
         elapsed = time.time() - start
         forward_min = min(forward_min, elapsed)
         forward_time += elapsed
 
         if options.backward:
+            out = out.norm()
+            torch.cuda.synchronize()
             start = time.time()
-            out.norm().backward()
+            out.backward()
+            torch.cuda.synchronize()
             elapsed = time.time() - start
             backward_min = min(backward_min, elapsed)
             backward_time += elapsed

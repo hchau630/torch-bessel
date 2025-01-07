@@ -10,10 +10,6 @@ import torch_bessel
 TIME_SCALES = {"s": 1, "ms": 1000, "us": 1000000}
 
 
-def bessel_k(nu, z):
-    return special.kv(nu, z)
-
-
 def bessel_k0(z):
     return special.kv(0.0, z)
 
@@ -21,9 +17,7 @@ def bessel_k0(z):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("example", choices=["py", "cpp"])
-    parser.add_argument(
-        "-f", "--func", choices=["bessel_k", "bessel_k0"], default="bessel_k"
-    )
+    parser.add_argument("-f", "--func", choices=["bessel_k0"], default="bessel_k0")
     parser.add_argument("-d", "--device", choices=["cpu", "cuda"], default="cpu")
     parser.add_argument("-n", type=int, default=1 << 16)
     parser.add_argument("-r", "--runs", type=int, default=100)
@@ -47,21 +41,9 @@ def main():
     backward_min = math.inf
     backward_time = 0
     for _ in range(options.runs):
-        if options.func == "bessel_k":
-            args = (
-                torch.randn((options.n,), **kwargs),
-                torch.complex(
-                    *torch.randn(
-                        (2, options.n), **kwargs, requires_grad=options.backward
-                    )
-                ),
-            )
-        elif options.func == "bessel_k0":
-            real = torch.randn(
-                options.n, **kwargs, requires_grad=options.backward
-            ).abs()
-            imag = torch.randn(options.n, **kwargs, requires_grad=options.backward)
-            args = (torch.complex(real, imag),)
+        real = torch.randn(options.n, **kwargs, requires_grad=options.backward).abs()
+        imag = torch.randn(options.n, **kwargs, requires_grad=options.backward)
+        args = (torch.complex(real, imag),)
 
         torch.cuda.synchronize()
         start = time.time()

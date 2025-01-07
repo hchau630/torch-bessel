@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 
-__all__ = ["bessel_k"]
+__all__ = ["bessel_k", "bessel_k0"]
 
 
 def bessel_k(nu: Tensor, z: Tensor) -> Tensor:
@@ -10,10 +10,12 @@ def bessel_k(nu: Tensor, z: Tensor) -> Tensor:
     return torch.ops.torch_bessel.bessel_k_forward.default(nu, z)
 
 
-# Registers a FakeTensor kernel (aka "meta kernel", "abstract impl")
-# that describes what the properties of the output Tensor are given
-# the properties of the input Tensor. The FakeTensor kernel is necessary
-# for the op to work performantly with torch.compile.
+def bessel_k0(z: Tensor) -> Tensor:
+    if z.requires_grad:
+        return torch.ops.torch_bessel.bessel_k0_forward_backward.default(z)[0]
+    return torch.ops.torch_bessel.bessel_k0_forward.default(z)
+
+
 @torch.library.register_fake("torch_bessel::bessel_k_forward")
 def _(nu, z):
     torch._check(nu.device == z.device)
@@ -23,10 +25,6 @@ def _(nu, z):
     return out
 
 
-# Registers a FakeTensor kernel (aka "meta kernel", "abstract impl")
-# that describes what the properties of the output Tensor are given
-# the properties of the input Tensor. The FakeTensor kernel is necessary
-# for the op to work performantly with torch.compile.
 @torch.library.register_fake("torch_bessel::bessel_k_forward_backward")
 def _(nu, z):
     torch._check(nu.device == z.device)
@@ -37,7 +35,17 @@ def _(nu, z):
     return out1, out2
 
 
-def _backward(ctx, grad, _):
+@torch.library.register_fake("torch_bessel::bessel_k0_forward")
+def _(z):
+    return torch.empty_like(z)
+
+
+@torch.library.register_fake("torch_bessel::bessel_k0_forward_backward")
+def _(z):
+    return torch.empty_like(z), torch.empty_like(z)
+
+
+def bessel_k_backward(ctx, grad, _):
     grad_v, grad_z = None, None
     if ctx.needs_input_grad[0]:
         raise NotImplementedError("gradient of bessel_k w.r.t nu is not implemented.")
@@ -46,16 +54,32 @@ def _backward(ctx, grad, _):
     return grad_v, grad_z
 
 
-def _setup_context(ctx, inputs, output):
+def bessel_k_setup_context(ctx, inputs, output):
     if ctx.needs_input_grad[0]:
         raise NotImplementedError("gradient of bessel_k w.r.t nu is not implemented.")
     if ctx.needs_input_grad[1]:
         ctx.save_for_backward(output[-1])
 
 
-# This adds training support for the operator. You must provide us
-# the backward formula for the operator and a `setup_context` function
-# to save values to be used in the backward.
+def bessel_k0_backward(ctx, grad, _):
+    if ctx.needs_input_grad[0]:
+        return grad * ctx.saved_tensors[0]
+    return None
+
+
+def bessel_k0_setup_context(ctx, inputs, output):
+    if ctx.needs_input_grad[0]:
+        ctx.save_for_backward(output[-1])
+
+
 torch.library.register_autograd(
-    "torch_bessel::bessel_k_forward_backward", _backward, setup_context=_setup_context
+    "torch_bessel::bessel_k_forward_backward",
+    bessel_k_backward,
+    setup_context=bessel_k_setup_context,
+)
+
+torch.library.register_autograd(
+    "torch_bessel::bessel_k0_forward_backward",
+    bessel_k0_backward,
+    setup_context=bessel_k0_setup_context,
 )

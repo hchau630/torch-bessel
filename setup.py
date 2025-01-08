@@ -71,6 +71,7 @@ def get_extensions():
 setup(
     name=library_name,
     version="0.0.1",
+    author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),
     install_requires=["torch"],

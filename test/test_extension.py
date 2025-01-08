@@ -28,17 +28,23 @@ class TestBesselK0(TestCase):
         ]
 
     def grid_inputs(self, device, *, requires_grad=False):
-        def make_z(*args, dtype=None):
+        def make_z(*args, dtype=torch.float):
+            real = torch.tensor([0, *torch.logspace(*args, dtype=torch.double)])
+            imag = torch.logspace(*args, dtype=torch.double)
+
+            # Don't test on subnormal numbers, since the AMOS code does not consider them
+            real[real < torch.finfo(dtype).tiny] = 0.0
+            imag[imag < torch.finfo(dtype).tiny] = 0.0
+
             kwargs = dict(dtype=dtype, device=device, requires_grad=requires_grad)
-            real = torch.tensor([0, *torch.logspace(*args, **kwargs)], **kwargs)
-            imag = torch.logspace(*args, **kwargs)
+            real = torch.tensor(real, **kwargs)
             imag = torch.tensor([*(-imag.flip(0)), 0, *imag], **kwargs)
             real, imag = real[:, None], imag[None, :]
             return torch.complex(real, imag)
 
         return [
             [make_z(-350, 350, 75, dtype=torch.double)],
-            [make_z(-25, 50, 75)],
+            [make_z(-50, 50, 75)],
         ]
 
     def _test_correctness(self, device):
@@ -46,10 +52,21 @@ class TestBesselK0(TestCase):
             self.sample_inputs(device)
             + self.grid_inputs(device)
             + self.sample_inputs(device, requires_grad=True)
+            + self.grid_inputs(device, requires_grad=True)
         )
         for args in samples:
             result = torch_bessel.ops.bessel_k0(*args)
             expected = reference_bessel_k0(*args)
+            if expected.dtype in {torch.float, torch.complex64}:
+                # ierr = 4, complete loss of significance
+                expected[args[0].abs() > 4194303.98419452] = torch.nan
+                # ierr = 2, overflow
+                mask = args[0].abs() < 1.1754944e-35
+                if expected.dtype == torch.complex64:
+                    expected[mask] = torch.nan
+                    expected[mask & (args[0].imag == 0) & (args[0] != 0)] = torch.inf
+                else:
+                    expected[mask & (args[0] != 0)] = torch.inf
             torch.testing.assert_close(result, expected, equal_nan=True)
 
     def test_correctness_cpu(self):
@@ -77,8 +94,12 @@ class TestBesselK0(TestCase):
 
     def _opcheck(self, device):
         # Use opcheck to check for incorrect usage of operator registration APIs
-        samples = self.sample_inputs(device, requires_grad=True)
-        samples.extend(self.sample_inputs(device, requires_grad=False))
+        samples = (
+            self.sample_inputs(device)
+            + self.grid_inputs(device)
+            + self.sample_inputs(device, requires_grad=True)
+            + self.grid_inputs(device, requires_grad=True)
+        )
         for args in samples:
             opcheck(torch.ops.torch_bessel.bessel_k0_forward_backward.default, args)
 

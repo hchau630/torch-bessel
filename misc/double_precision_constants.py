@@ -1,4 +1,3 @@
-import numpy as np
 import math
 
 d1mach = [
@@ -6,13 +5,6 @@ d1mach = [
     1.7976931348623157e308,  # np.finfo(np.float64).max
     1.1102230246251565e-16,  # 0.5 * np.finfo(np.float64).eps
     2.220446049250313e-16,  # np.finfo(np.float64).eps
-    0.3010299956639812,  # np.log10(2)
-]
-r1mach = [
-    1.1754944e-38,  # np.finfo(np.float32).tiny
-    3.4028235e38,  # np.finfo(np.float32).max
-    5.9604645e-08,  # 0.5 * np.finfo(np.float32).eps
-    1.1920929e-07,  # np.finfo(np.float32).eps
     0.3010299956639812,  # np.log10(2)
 ]
 i1mach = [
@@ -98,6 +90,7 @@ koded = kode
 inu = (int)(fnu + 0.5)
 dnu = fnu - inu
 
+print(f"{1/tol=}")
 print(f"{css=}")
 print(f"{csr=}")
 print(f"{bry=}")

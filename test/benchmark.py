@@ -10,6 +10,10 @@ import torch_bessel
 TIME_SCALES = {"s": 1, "ms": 1000, "us": 1000000}
 
 
+def exp(z):
+    return torch.exp(z)
+
+
 def bessel_k0(z):
     return special.kv(0.0, z)
 
@@ -17,7 +21,7 @@ def bessel_k0(z):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("example", choices=["py", "cpp"])
-    parser.add_argument("-f", "--func", choices=["bessel_k0"], default="bessel_k0")
+    parser.add_argument("-f", "--func", choices=["bessel_k0", "exp"], default="bessel_k0")
     parser.add_argument("-d", "--device", choices=["cpu", "cuda"], default="cpu")
     parser.add_argument("-n", type=int, default=1 << 16)
     parser.add_argument("-r", "--runs", type=int, default=100)

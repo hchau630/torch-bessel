@@ -6,14 +6,15 @@
 #include "amos.h"
 
 
-inline C10_HOST_DEVICE c10::complex<double> bessel_k0_forward(c10::complex<double> z) {
-    c10::complex<double> cy(NAN, NAN);
+template <typename T>
+inline C10_HOST_DEVICE c10::complex<T> bessel_k0_forward(c10::complex<T> z) {
+    c10::complex<T> cy(NAN, NAN);
     if (std::isnan(std::real(z)) || isnan(std::imag(z))) {
        return cy;
     }
 
     int ierr;
-    int nz = amos::besk0(z, 1, &cy, &ierr);
+    amos::besk0(z, 1, &cy, &ierr);
     if (ierr == 2) {
         if (std::real(z) >= 0 && std::imag(z) == 0) {
             /* overflow */
@@ -24,15 +25,16 @@ inline C10_HOST_DEVICE c10::complex<double> bessel_k0_forward(c10::complex<doubl
     return cy;
 }
 
-inline C10_HOST_DEVICE void bessel_k0_forward_backward(c10::complex<double> z, c10::complex<double>* cy) {
+template <typename T>
+inline C10_HOST_DEVICE void bessel_k0_forward_backward(c10::complex<T> z, c10::complex<T>* cy) {
+    cy[0] = c10::complex<T>(NAN, NAN);
+    cy[1] = c10::complex<T>(NAN, NAN);
     if (std::isnan(std::real(z)) || isnan(std::imag(z))) {
-        cy[0] = c10::complex<double>(NAN, NAN);
-        cy[1] = c10::complex<double>(NAN, NAN);
         return;
     }
 
     int ierr;
-    int nz = amos::besk0(z, 2, cy, &ierr);
+    amos::besk0(z, 2, cy, &ierr);
 
     /* dK_0(z)/dz = -K_1(z), conjugation needed for PyTorch gradient computation */
     cy[1] = -std::conj(cy[1]);
@@ -45,18 +47,6 @@ inline C10_HOST_DEVICE void bessel_k0_forward_backward(c10::complex<double> z, c
         }
     }
 
-    return;
-}
-
-inline C10_HOST_DEVICE c10::complex<float> bessel_k0_forward(c10::complex<float> z) {
-    return static_cast<c10::complex<float>>(bessel_k0_forward(static_cast<c10::complex<double>>(z)));
-}
-
-inline C10_HOST_DEVICE void bessel_k0_forward_backward(c10::complex<float> z, c10::complex<float>* cy) {
-    c10::complex<double> cy_[2];
-    bessel_k0_forward_backward(static_cast<c10::complex<double>>(z), cy_);
-    cy[0] = static_cast<c10::complex<float>>(cy_[0]);
-    cy[1] = static_cast<c10::complex<float>>(cy_[1]);
     return;
 }
 
@@ -78,7 +68,7 @@ inline C10_HOST_DEVICE T bessel_k0_forward(T z) {
         return 0;
     }
 
-    return std::real(bessel_k0_forward(c10::complex(z)));
+    return std::real(bessel_k0_forward(c10::complex<T>(z)));
 }
 
 template <typename T>

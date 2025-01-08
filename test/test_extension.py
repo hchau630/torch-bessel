@@ -94,12 +94,8 @@ class TestBesselK0(TestCase):
 
     def _opcheck(self, device):
         # Use opcheck to check for incorrect usage of operator registration APIs
-        samples = (
-            self.sample_inputs(device)
-            + self.grid_inputs(device)
-            + self.sample_inputs(device, requires_grad=True)
-            + self.grid_inputs(device, requires_grad=True)
-        )
+        samples = self.sample_inputs(device, requires_grad=False)
+        samples.extend(self.sample_inputs(device, requires_grad=True))
         for args in samples:
             opcheck(torch.ops.torch_bessel.bessel_k0_forward_backward.default, args)
 

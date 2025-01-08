@@ -561,36 +561,7 @@ inline C10_HOST_DEVICE int bknu0(
     kk = nz + 2;
     s2 = y[kk-1];
     y[kk-1] = s2 * csr[0];
-    if (nz == n - 2) { return nz; }
-    t2 = kk-1;
-    ck = t2 * rz;
-    kflag = 1;
-
-    // L140
-    kk += 1;
-    if (kk > n) { return nz; }
-    p1 = csr[kflag-1];
-    ascle = bry[kflag-1];
-    for (i = kk; i < (n+1); i++)
-    {
-        p2 = s2;
-        s2 = ck*s2 + s1;
-        s1 = p2;
-        ck += rz;
-        p2 = s2*p1;
-        y[i-1] = p2;
-        if (kflag < 3) {
-            if (fmax(fabs(std::real(p2)), fabs(std::imag(p2))) > ascle) {
-                kflag += 1;
-                ascle = bry[kflag-1];
-                s1 *= p1;
-                s2 = p2;
-                s1 *= css[kflag-1];
-                s2 *= css[kflag-1];
-                p1 = csr[kflag-1];
-            }
-        }
-    }
+    // since 0 < n <= 2 and 0 <= nz <= 2, here we must have nz == n - 2, so we can just return
     return nz;
 }
 
@@ -616,24 +587,18 @@ inline C10_HOST_DEVICE int kscl0(
     //***END PROLOGUE  ZKSCL
 
     c10::complex<double> cy[2] = { 0. };
-    double as, acs, alas, zri, xx;
-    c10::complex<double> s1, s2, cs, ck, zd;
+    c10::complex<double> s1, cs;
     int nz = 0;
     int ic = 0;
-    int kk = 0;
     int i;
-    double elm = exp(-elim);
-    xx = std::real(zr);
 
     for (i = 1; i < (n + 1); i++)
     {
         s1 = y[i-1];
         cy[i-1] = s1;
-        as = std::abs(s1);
-        acs = -std::real(zr) + log(as);
         nz += 1;
         y[i-1] = 0.;
-        if (acs < -elim) {
+        if (-std::real(zr) + log(std::abs(s1)) < -elim) {
             continue;
         }
         cs = -zr + std::log(s1);
@@ -651,60 +616,6 @@ inline C10_HOST_DEVICE int kscl0(
         y[0] = 0.;
         nz = 2;
     }
-    if (n == 2) {
-        return nz;
-    }
-    if (nz == 0) {
-        return nz;
-    }
-
-    ck = rz;
-    s1 = cy[0];
-    s2 = cy[1];
-    zri = std::imag(zr);
-    zd = zr;
-    for (i = 3; i < (n+1); i++)
-    {
-        kk = i;
-        cs = s2;
-        s2 *= ck;
-        s2 += s1;
-        s1 = cs;
-        ck += rz;
-        as = std::abs(s2);
-        alas = log(as);
-        acs = alas - xx;
-        nz += 1;
-        y[i-1] = 0.;
-        if (acs >= -elim) {
-            cs = std::log(s2);
-            cs -= zd;
-            cs = (exp(std::real(cs))/tol)*c10::complex<double>(cos(std::imag(cs)), sin(std::imag(cs)));
-            if (!uchk(cs, *ascle, tol)) {
-                y[i-1] = cs;
-                nz -= 1;
-                if (ic == kk-1) {
-                    nz = kk - 2;
-                    for (int i = 0; i < nz; i++) { y[i] = 0.; }
-                    return nz;
-                }
-                ic = kk;
-                continue;
-            }
-        }
-        if (alas >= 0.5*elim){
-            xx -= elim;
-            zd = c10::complex<double>(xx, zri);
-            s1 *= elm;
-            s2 *= elm;
-        }
-    }
-    nz = n;
-    if (ic == n) {
-        nz = n-1;
-    }
-
-    for (int i = 0; i < nz; i++) { y[i] = 0.; }
     return nz;
 }
 

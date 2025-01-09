@@ -62,3 +62,4 @@ compile_commands.json
 
 # VSCode
 .vscode
+.pytest_cache

@@ -2,3 +2,6 @@ torch>=2.4.0
 numpy
 scipy
 expecttest
+pytest
+ninja
+flake8

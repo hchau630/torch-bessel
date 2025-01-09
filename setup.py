@@ -75,6 +75,7 @@ setup(
     packages=find_packages(),
     ext_modules=get_extensions(),
     install_requires=["torch"],
+    python_requires=">= 3.9",
     description="PyTorch extension package for Bessel functions with arbitrary real order and complex inputs",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

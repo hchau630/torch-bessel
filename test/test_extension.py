@@ -1,7 +1,7 @@
 import torch
 from torch.testing._internal.common_utils import TestCase
 from torch.testing._internal.optests import opcheck
-import unittest
+import pytest
 from scipy import special
 
 import torch_bessel
@@ -32,7 +32,7 @@ class TestBesselK0(TestCase):
             real = torch.tensor([0, *torch.logspace(*args, dtype=torch.double)])
             imag = torch.logspace(*args, dtype=torch.double)
 
-            # Don't test on subnormal numbers, since the AMOS code does not consider them
+            # Don't test on subnormal numbers, since the AMOS code doesn't consider them
             real[real < torch.finfo(dtype).tiny] = 0.0
             imag[imag < torch.finfo(dtype).tiny] = 0.0
 
@@ -72,7 +72,7 @@ class TestBesselK0(TestCase):
     def test_correctness_cpu(self):
         self._test_correctness("cpu")
 
-    @unittest.skipIf(not torch.cuda.is_available(), "requires cuda")
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="requires cuda")
     def test_correctness_cuda(self):
         self._test_correctness("cuda")
 
@@ -88,7 +88,7 @@ class TestBesselK0(TestCase):
     def test_gradients_cpu(self):
         self._test_gradients("cpu")
 
-    @unittest.skipIf(not torch.cuda.is_available(), "requires cuda")
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="requires cuda")
     def test_gradients_cuda(self):
         self._test_gradients("cuda")
 
@@ -102,10 +102,6 @@ class TestBesselK0(TestCase):
     def test_opcheck_cpu(self):
         self._opcheck("cpu")
 
-    @unittest.skipIf(not torch.cuda.is_available(), "requires cuda")
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="requires cuda")
     def test_opcheck_cuda(self):
         self._opcheck("cuda")
-
-
-if __name__ == "__main__":
-    unittest.main()

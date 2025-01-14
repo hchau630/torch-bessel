@@ -15,14 +15,34 @@ assert (
 torch.ops.load_library(so_files[0])
 
 
+class ModifiedBesselK0(torch.autograd.Function):
+    @staticmethod
+    def forward(x):
+        return torch.special.modified_bessel_k0(x)
+
+    @staticmethod
+    def setup_context(ctx, inputs, _):
+        if ctx.needs_input_grad[0]:
+            ctx.save_for_backward(*inputs)
+        ctx.set_materialize_grads(False)
+
+    @staticmethod
+    def backward(ctx, grad):
+        if grad is None or not ctx.needs_input_grad[0]:
+            return None
+
+        (x,) = ctx.saved_tensors
+        return -torch.special.modified_bessel_k1(x).mul_(grad)
+
+
 def modified_bessel_k0(z: Tensor) -> Tensor:
-    if z.requires_grad:
-        return (
-            torch.ops.torch_bessel.modified_bessel_k0_complex_forward_backward.default(
-                z
-            )[0]
-        )
-    return torch.ops.torch_bessel.modified_bessel_k0_complex_forward.default(z)
+    if not z.is_complex():
+        return ModifiedBesselK0.apply(z)
+    if not z.requires_grad:
+        return torch.ops.torch_bessel.modified_bessel_k0_complex_forward.default(z)
+    return torch.ops.torch_bessel.modified_bessel_k0_complex_forward_backward.default(
+        z
+    )[0]
 
 
 @torch.library.register_fake("torch_bessel::modified_bessel_k0_complex_forward")

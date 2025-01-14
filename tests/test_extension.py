@@ -97,6 +97,8 @@ class TestBesselK0(TestCase):
         samples = self.sample_inputs(device, requires_grad=False)
         samples.extend(self.sample_inputs(device, requires_grad=True))
         for args in samples:
+            if not args[0].is_complex():
+                continue
             opcheck(
                 torch.ops.torch_bessel.modified_bessel_k0_complex_forward_backward.default,
                 args,

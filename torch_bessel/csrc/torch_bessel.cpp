@@ -14,7 +14,7 @@ at::Tensor modified_bessel_k0_complex_forward_cpu(const at::Tensor& z) {
   at::ScalarType dtype = z.scalar_type();
   at::Tensor result = torch::empty(at::IntArrayRef(), dtype).resize_(0);
   at::TensorIterator iter = build_iterator_11(result, z);
-  AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(dtype, "modified_bessel_k0_complex_forward_cpu", [&]() {
+  AT_DISPATCH_COMPLEX_TYPES(dtype, "modified_bessel_k0_complex_forward_cpu", [&]() {
     at::native::cpu_kernel(iter, [](scalar_t z) -> scalar_t {
       return modified_bessel_k0_complex_forward(z);
     });
@@ -28,7 +28,7 @@ std::tuple<at::Tensor, at::Tensor> modified_bessel_k0_complex_forward_backward_c
   at::Tensor result1 = torch::empty(at::IntArrayRef(), dtype).resize_(0);
   at::Tensor result2 = torch::empty(at::IntArrayRef(), dtype).resize_(0);
   at::TensorIterator iter = build_iterator_21(result1, result2, z);
-  AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(dtype, "modified_bessel_k0_complex_forward_backward_cpu", [&]() {
+  AT_DISPATCH_COMPLEX_TYPES(dtype, "modified_bessel_k0_complex_forward_backward_cpu", [&]() {
     at::native::cpu_kernel_multiple_outputs(iter, [](scalar_t z) -> std::tuple<scalar_t, scalar_t> {
       scalar_t cy[2];
       modified_bessel_k0_complex_forward_backward(z, cy);

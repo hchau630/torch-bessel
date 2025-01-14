@@ -1,20 +1,21 @@
-# torch-bessel
+# About
 PyTorch extension package for Bessel functions with arbitrary real order and complex inputs
 
-# setup
-This repo works with PyTorch 2.4+. To setup on Axon with an A40 GPU, I performed the following steps:
-1) `ml gcc/10.4` (Axon defaults to a very old version of gcc)
-2) `conda create -n torch-bessel python=3.11`
-3) `conda env config vars set PYTHONNOUSERSITE=1 -n torch-bessel` (ignore `.local` packages)
-4) `conda env config vars set CPATH=/home/hc3190/.conda/envs/torch-bessel/targets/x86_64-linux/include/:$CPATH -n torch-bessel`
-5) `conda activate torch-bessel`
-6) `conda install nvidia/label/cuda-12.4.1::cuda-toolkit`
-7) `pip install -r requirements.txt`
+# Install
+```
+pip install torch-bessel
+```
 
-To build and test:
+# Example usage
 ```
-rm -r build
-pip install .
-python test/test_extension.py
+import torch_bessel
+
+z = torch.randn(10) + 1j
+torch_bessel.ops.modified_bessel_k0(z)
 ```
-Note that the first line is only required if you have already built the extension and want to do a fresh rebuild.
+
+# Implemented functions
+- `modified_bessel_k0`: Same as `torch.special.modified_bessel_k0`, but also handles backpropagation and complex inputs with $\mathrm{Im}(z) \geq 0$ on cpu and cuda.
+
+# WIP
+- `modified_bessel_kv`: Analogue of `scipy.special.kv`.

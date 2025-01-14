@@ -1,0 +1,59 @@
+name: Build and upload to PyPI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - published
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # macos-13 is an intel runner, macos-14 is apple silicon
+        os: [ubuntu-latest, macos-13, macos-14]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
+        env:
+          CIBW_BUILD: cp*-macosx_*
+          CIBW_BUILD: cp*-manylinux_*
+          CIBW_SKIP: cp*-manylinux_armv7l
+          CIBW_BUILD_FRONTEND: build
+          CIBW_BEFORE_LINUX: >
+            yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo &&
+            yum clean all &&
+            yum -y install cuda-toolkit-12-4 &&
+            export CPATH=/usr/local/cuda/include:$CPATH
+          CIBW_TEST_REQUIRES: pytest expecttest scipy
+          CIBW_TEST_COMMAND: pytest {project}/tests
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  upload_pypi:
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all CIBW artifacts into dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

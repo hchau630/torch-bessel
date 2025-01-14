@@ -7,7 +7,7 @@ from scipy import special
 import torch_bessel
 
 
-def reference_bessel_k0(z):
+def reference_modified_bessel_k0(z):
     device = z.device
     return special.kv(0.0, z.detach().cpu()).to(device)
 
@@ -55,8 +55,8 @@ class TestBesselK0(TestCase):
             + self.grid_inputs(device, requires_grad=True)
         )
         for args in samples:
-            result = torch_bessel.ops.bessel_k0(*args)
-            expected = reference_bessel_k0(*args)
+            result = torch_bessel.ops.modified_bessel_k0(*args)
+            expected = reference_modified_bessel_k0(*args)
             if expected.dtype in {torch.float, torch.complex64}:
                 # ierr = 4, complete loss of significance
                 expected[args[0].abs() > 4194303.98419452] = torch.nan
@@ -83,7 +83,7 @@ class TestBesselK0(TestCase):
                 args[0].dtype in {torch.double, torch.complex128}
                 and args[0].requires_grad
             ):
-                torch.autograd.gradcheck(torch_bessel.ops.bessel_k0, args)
+                torch.autograd.gradcheck(torch_bessel.ops.modified_bessel_k0, args)
 
     def test_gradients_cpu(self):
         self._test_gradients("cpu")
@@ -97,7 +97,10 @@ class TestBesselK0(TestCase):
         samples = self.sample_inputs(device, requires_grad=False)
         samples.extend(self.sample_inputs(device, requires_grad=True))
         for args in samples:
-            opcheck(torch.ops.torch_bessel.bessel_k0_forward_backward.default, args)
+            opcheck(
+                torch.ops.torch_bessel.modified_bessel_k0_complex_forward_backward.default,
+                args,
+            )
 
     def test_opcheck_cpu(self):
         self._opcheck("cpu")

@@ -9,29 +9,29 @@
 
 namespace torch_bessel {
 
-at::Tensor bessel_k0_forward_cpu(const at::Tensor& z) {
+at::Tensor modified_bessel_k0_complex_forward_cpu(const at::Tensor& z) {
   TORCH_INTERNAL_ASSERT(z.device().type() == at::DeviceType::CPU);
   at::ScalarType dtype = z.scalar_type();
   at::Tensor result = torch::empty(at::IntArrayRef(), dtype).resize_(0);
   at::TensorIterator iter = build_iterator_11(result, z);
-  AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(dtype, "bessel_k0_forward_cpu", [&]() {
+  AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(dtype, "modified_bessel_k0_complex_forward_cpu", [&]() {
     at::native::cpu_kernel(iter, [](scalar_t z) -> scalar_t {
-      return bessel_k0_forward(z);
+      return modified_bessel_k0_complex_forward(z);
     });
   });
   return result;
 }
 
-std::tuple<at::Tensor, at::Tensor> bessel_k0_forward_backward_cpu(const at::Tensor& z) {
+std::tuple<at::Tensor, at::Tensor> modified_bessel_k0_complex_forward_backward_cpu(const at::Tensor& z) {
   TORCH_INTERNAL_ASSERT(z.device().type() == at::DeviceType::CPU);
   at::ScalarType dtype = z.scalar_type();
   at::Tensor result1 = torch::empty(at::IntArrayRef(), dtype).resize_(0);
   at::Tensor result2 = torch::empty(at::IntArrayRef(), dtype).resize_(0);
   at::TensorIterator iter = build_iterator_21(result1, result2, z);
-  AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(dtype, "bessel_k0_forward_backward_cpu", [&]() {
+  AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES(dtype, "modified_bessel_k0_complex_forward_backward_cpu", [&]() {
     at::native::cpu_kernel_multiple_outputs(iter, [](scalar_t z) -> std::tuple<scalar_t, scalar_t> {
       scalar_t cy[2];
-      bessel_k0_forward_backward(z, cy);
+      modified_bessel_k0_complex_forward_backward(z, cy);
       return std::make_tuple(cy[0], cy[1]);
     });
   });
@@ -44,14 +44,14 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {}
 
 // Defines the operators
 TORCH_LIBRARY(torch_bessel, m) {
-  m.def("bessel_k0_forward(Tensor z) -> Tensor");
-  m.def("bessel_k0_forward_backward(Tensor z) -> (Tensor, Tensor)");
+  m.def("modified_bessel_k0_complex_forward(Tensor z) -> Tensor");
+  m.def("modified_bessel_k0_complex_forward_backward(Tensor z) -> (Tensor, Tensor)");
 }
 
 // Registers CPU implementations for bessel_k
 TORCH_LIBRARY_IMPL(torch_bessel, CPU, m) {
-  m.impl("bessel_k0_forward", &bessel_k0_forward_cpu);
-  m.impl("bessel_k0_forward_backward", &bessel_k0_forward_backward_cpu);
+  m.impl("modified_bessel_k0_complex_forward", &modified_bessel_k0_complex_forward_cpu);
+  m.impl("modified_bessel_k0_complex_forward_backward", &modified_bessel_k0_complex_forward_backward_cpu);
 }
 
 }

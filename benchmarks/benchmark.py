@@ -3,6 +3,7 @@ import math
 import time
 
 import torch
+from torch import Tensor
 from scipy import special
 
 import torch_bessel
@@ -10,19 +11,50 @@ import torch_bessel
 TIME_SCALES = {"s": 1, "ms": 1000, "us": 1000000}
 
 
-def exp(z):
-    return torch.exp(z)
+class ModifiedBesselK0(torch.autograd.Function):
+    @staticmethod
+    def forward(z):
+        if z.is_complex():
+            out = special.kv(0, z.detach().cpu().numpy())
+            out = torch.as_tensor(out).to(dtype=z.dtype, device=z.device)
+        else:
+            out = torch.special.modified_bessel_k0(z)
+        return out
+
+    @staticmethod
+    def setup_context(ctx, inputs, _):
+        if ctx.needs_input_grad[0]:
+            ctx.save_for_backward(*inputs)
+        ctx.set_materialize_grads(False)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        if grad_output is None or not ctx.needs_input_grad[0]:
+            return None
+
+        (z,) = ctx.saved_tensors
+        if z.is_complex():
+            # Note: We need to take the conjugate of the derivative. To understand why,
+            # see https://pytorch.org/docs/stable/notes/autograd.html#complex-autograd-doc
+            # where in equation 4 we note that since this is a holomorphic function,
+            # the derivative w.r.t conjugate of z is zero, so the first term is zero.
+            grad = -special.kv(1, z.detach().cpu().numpy())
+            grad = torch.as_tensor(grad).to(dtype=z.dtype, device=z.device).conj()
+        else:
+            grad = -torch.special.modified_bessel_k1(z)
+
+        return grad.mul_(grad_output)
 
 
-def bessel_k0(z):
-    return special.kv(0.0, z)
+def modified_bessel_k0(z: Tensor):
+    return ModifiedBesselK0.apply(z)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("example", choices=["py", "cpp"])
     parser.add_argument(
-        "-f", "--func", choices=["bessel_k0", "exp"], default="bessel_k0"
+        "-f", "--func", choices=["modified_bessel_k0"], default="modified_bessel_k0"
     )
     parser.add_argument("-d", "--device", choices=["cpu", "cuda"], default="cpu")
     parser.add_argument("-n", type=int, default=1 << 16)
@@ -30,6 +62,7 @@ def main():
     parser.add_argument("-s", "--scale", choices=["s", "ms", "us"], default="us")
     parser.add_argument("-b", "--backward", action="store_true")
     parser.add_argument("--double", action="store_true")
+    parser.add_argument("--real", action="store_true")
     options = parser.parse_args()
 
     if options.example == "py":
@@ -48,8 +81,11 @@ def main():
     backward_time = 0
     for _ in range(options.runs):
         real = torch.randn(options.n, **kwargs, requires_grad=options.backward).abs()
-        imag = torch.randn(options.n, **kwargs, requires_grad=options.backward)
-        args = (torch.complex(real, imag),)
+        if options.real:
+            args = (real,)
+        else:
+            imag = torch.randn(options.n, **kwargs, requires_grad=options.backward)
+            args = (torch.complex(real, imag),)
 
         if options.device == "cuda":
             torch.cuda.synchronize()

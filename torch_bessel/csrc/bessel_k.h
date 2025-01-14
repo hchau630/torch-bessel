@@ -7,7 +7,7 @@
 
 
 template <typename T>
-inline C10_HOST_DEVICE c10::complex<T> bessel_k0_forward(c10::complex<T> z) {
+inline C10_HOST_DEVICE c10::complex<T> modified_bessel_k0_complex_forward(c10::complex<T> z) {
     c10::complex<T> cy(NAN, NAN);
     if (std::isnan(std::real(z)) || isnan(std::imag(z))) {
        return cy;
@@ -26,7 +26,7 @@ inline C10_HOST_DEVICE c10::complex<T> bessel_k0_forward(c10::complex<T> z) {
 }
 
 template <typename T>
-inline C10_HOST_DEVICE void bessel_k0_forward_backward(c10::complex<T> z, c10::complex<T>* cy) {
+inline C10_HOST_DEVICE void modified_bessel_k0_complex_forward_backward(c10::complex<T> z, c10::complex<T>* cy) {
     cy[0] = c10::complex<T>(NAN, NAN);
     cy[1] = c10::complex<T>(NAN, NAN);
     if (std::isnan(std::real(z)) || isnan(std::imag(z))) {
@@ -51,7 +51,7 @@ inline C10_HOST_DEVICE void bessel_k0_forward_backward(c10::complex<T> z, c10::c
 }
 
 template <typename T>
-inline C10_HOST_DEVICE T bessel_k0_forward(T z) {
+inline C10_HOST_DEVICE T modified_bessel_k0_complex_forward(T z) {
     if (z < 0) {
         return std::numeric_limits<T>::quiet_NaN();
     }
@@ -68,11 +68,11 @@ inline C10_HOST_DEVICE T bessel_k0_forward(T z) {
         return 0;
     }
 
-    return std::real(bessel_k0_forward(c10::complex<T>(z)));
+    return std::real(modified_bessel_k0_complex_forward(c10::complex<T>(z)));
 }
 
 template <typename T>
-inline C10_HOST_DEVICE void bessel_k0_forward_backward(T z, T* cy) {
+inline C10_HOST_DEVICE void modified_bessel_k0_complex_forward_backward(T z, T* cy) {
     if (z < 0) {
         cy[0] = std::numeric_limits<T>::quiet_NaN();
         cy[1] = std::numeric_limits<T>::quiet_NaN();
@@ -96,7 +96,7 @@ inline C10_HOST_DEVICE void bessel_k0_forward_backward(T z, T* cy) {
     }
 
     c10::complex<T> cy_[2];
-    bessel_k0_forward_backward(c10::complex<T>(z), cy_);
+    modified_bessel_k0_complex_forward_backward(c10::complex<T>(z), cy_);
     cy[0] = std::real(cy_[0]);
     cy[1] = std::real(cy_[1]);
     return;

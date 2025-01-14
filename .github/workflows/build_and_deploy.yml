@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
-        os: [ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-latest, macos-14]
 
     steps:
       - uses: actions/checkout@v4
@@ -32,8 +32,11 @@ jobs:
             yum clean all &&
             yum -y install cuda-toolkit-12-4 &&
             export CPATH=/usr/local/cuda/include:$CPATH
-          # don't repair wheel since it causes error which I can't fix
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
+          # https://cibuildwheel.pypa.io/en/stable/faq/#macos-passing-dyld_library_path-to-delocate
+          CIBW_BEFORE_BUILD_MACOS: >
+            export REPAIR_LIBRARY_PATH="$(python -c 'import build; from pathlib import Path; print(Path(build.__file__).parent.parent / "torch" / "lib")')"
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_TEST_REQUIRES: pytest expecttest scipy
           CIBW_TEST_COMMAND: pytest {project}/tests
 

@@ -24,8 +24,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         env:
-          CIBW_BUILD: cp*-macosx_*
-          CIBW_BUILD: cp*-manylinux_*
+          CIBW_BUILD: cp*-macosx_* cp*-manylinux_*
           CIBW_SKIP: cp*-manylinux_armv7l
           CIBW_BUILD_FRONTEND: build
           CIBW_BEFORE_LINUX: >
@@ -44,7 +43,6 @@ jobs:
   upload_pypi:
     needs: [build_wheels]
     runs-on: ubuntu-latest
-    environment: pypi
     permissions:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'

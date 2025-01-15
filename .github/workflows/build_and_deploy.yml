@@ -34,16 +34,10 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: >
             yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo &&
             yum clean all &&
-            yum -y install cuda-toolkit-12-4 &&
-            export CPATH=/usr/local/cuda/include:$CPATH &&
-            export TORCH_CUDA_ARCH_LIST="5.0+PTX;6.0;7.0;7.5;8.0;8.6;9.0" &&
-            export FORCE_CUDA=1 &&
-            echo $TORCH_CUDA_ARCH_LIST &&
-            echo $FORCE_CUDA &&
-            echo $CPATH
+            yum -y install cuda-toolkit-12-4
           # https://github.com/pytorch/test-infra/blob/main/tools/pkg-helpers/pytorch_pkg_helpers/cuda.py
-          CIBW_ENVIRONMENT: TORCH_CUDA_ARCH_LIST="5.0+PTX;6.0;7.0;7.5;8.0;8.6;9.0" FORCE_CUDA=1
-          CIBW_ENVIRONMENT_PASS_LINUX: TORCH_CUDA_ARCH_LIST FORCE_CUDA
+          CIBW_ENVIRONMENT: CUDA_HOME=/usr/local/cuda CUDA_PATH=/usr/local/cuda PATH=/usr/local/cuda/bin:$PATH TORCH_CUDA_ARCH_LIST="5.0+PTX;6.0;7.0;7.5;8.0;8.6;9.0" FORCE_CUDA=1
+          CIBW_ENVIRONMENT_PASS_LINUX: CUDA_HOME CUDA_PATH PATH TORCH_CUDA_ARCH_LIST FORCE_CUDA
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           # see https://github.com/pytorch/ao/blob/main/packaging/post_build_script.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >

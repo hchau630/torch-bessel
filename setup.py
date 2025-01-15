@@ -4,7 +4,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
-import torch
 import glob
 
 from setuptools import find_packages, setup
@@ -70,7 +69,7 @@ def get_extensions():
 
 setup(
     name=library_name,
-    version="0.0.1",
+    version="0.0.2",
     author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),

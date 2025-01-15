@@ -36,7 +36,7 @@ jobs:
             export CPATH=/usr/local/cuda/include:$CPATH
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            curl --output temp.zip https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.5.1%2Bcpu.zip &&
+            curl --output temp.zip https://download.pytorch.org/libtorch/cu124/libtorch-shared-with-deps-2.5.1%2Bcu124.zip &&
             unzip temp.zip &&
             rm temp.zip &&
             ls &&

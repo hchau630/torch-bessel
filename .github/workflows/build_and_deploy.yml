@@ -36,6 +36,9 @@ jobs:
             yum -y install cuda-toolkit-12-4 &&
             export CPATH=/usr/local/cuda/include:$CPATH
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            ls -al /tmp &&
+            auditwheel repair -w {dest_dir} {wheel}
           # CIBW_TEST_REQUIRES: pytest expecttest scipy
           # CIBW_TEST_COMMAND: pytest {project}/tests
 

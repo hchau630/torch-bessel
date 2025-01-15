@@ -35,12 +35,9 @@ jobs:
             yum -y install cuda-toolkit-12-4 &&
             export CPATH=/usr/local/cuda/include:$CPATH
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
+          # see https://github.com/pytorch/ao/blob/main/packaging/post_build_script.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            curl --output temp.zip https://download.pytorch.org/libtorch/cu124/libtorch-shared-with-deps-2.5.1%2Bcu124.zip &&
-            unzip temp.zip &&
-            rm temp.zip &&
-            ls &&
-            LD_LIBRARY_PATH="$(pwd)/libtorch/lib" auditwheel repair -w {dest_dir} {wheel}
+            auditwheel repair --exclude libtorch.so --exclude libtorch_python.so --exclude libtorch_cuda.so --exclude libtorch_cpu.so --exclude libc10.so --exclude libc10_cuda.so --exclude libcudart.so.12 --exclude libcudart.so.11.0  -w {dest_dir} {wheel}
           # CIBW_TEST_REQUIRES: pytest expecttest scipy
           # CIBW_TEST_COMMAND: pytest {project}/tests
 

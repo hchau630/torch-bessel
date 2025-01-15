@@ -25,7 +25,6 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         env:
-          CIBW_BUILD_VERBOSITY: 3
           # CIBW_BUILD: cp*-macosx_* cp*-manylinux_*
           # CIBW_SKIP: cp*-manylinux_armv7l
           CIBW_BUILD: cp311-macosx_arm64 cp311-manylinux_x86_64
@@ -37,7 +36,7 @@ jobs:
             export CPATH=/usr/local/cuda/include:$CPATH
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            curl --output temp.zip https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-2.5.1%2Bcpu.zip &&
+            curl --output temp.zip https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.5.1%2Bcpu.zip &&
             unzip temp.zip &&
             rm temp.zip &&
             ls &&

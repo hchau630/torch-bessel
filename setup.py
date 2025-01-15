@@ -17,8 +17,6 @@ from torch.utils.cpp_extension import (
 )
 
 library_name = "torch_bessel"
-# https://github.com/pytorch/ao/blob/main/setup.py
-version_suffix = os.getenv("VERSION_SUFFIX", "")
 
 
 def get_extensions():
@@ -27,7 +25,7 @@ def get_extensions():
     if debug_mode:
         print("Compiling in debug mode")
 
-    use_cuda = use_cuda and torch.cuda.is_available() and CUDA_HOME is not None
+    use_cuda = use_cuda and CUDA_HOME is not None
     extension = CUDAExtension if use_cuda else CppExtension
 
     extra_link_args = []
@@ -72,7 +70,7 @@ def get_extensions():
 
 setup(
     name=library_name,
-    version="0.0.1" + version_suffix,
+    version="0.0.1",
     author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),

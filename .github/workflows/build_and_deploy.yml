@@ -40,7 +40,6 @@ jobs:
           CIBW_ENVIRONMENT: >
             TORCH_CUDA_ARCH_LIST="5.0+PTX;6.0;7.0;7.5;8.0;8.6;9.0"
             FORCE_CUDA=1
-            VERSION_SUFFIX="+cu124"
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           # see https://github.com/pytorch/ao/blob/main/packaging/post_build_script.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >

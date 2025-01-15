@@ -24,15 +24,16 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         env:
-          CIBW_BUILD: cp*-macosx_* cp*-manylinux_*
-          CIBW_SKIP: cp*-manylinux_armv7l
+          # CIBW_BUILD: cp*-macosx_* cp*-manylinux_*
+          # CIBW_SKIP: cp*-manylinux_armv7l
+          CIBW_BUILD: cp311-macosx_arm64 cp311-manylinux_x86_64
           CIBW_BUILD_FRONTEND: build
           CIBW_BEFORE_LINUX: >
             yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo &&
             yum clean all &&
             yum -y install cuda-toolkit-12-4 &&
             export CPATH=/usr/local/cuda/include:$CPATH
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
+          CIBW_REPAIR_WHEEL_COMMAND: ""
           CIBW_TEST_REQUIRES: pytest expecttest scipy
           CIBW_TEST_COMMAND: pytest {project}/tests
 

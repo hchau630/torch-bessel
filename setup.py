@@ -17,6 +17,8 @@ from torch.utils.cpp_extension import (
 )
 
 library_name = "torch_bessel"
+# https://github.com/pytorch/ao/blob/main/setup.py
+version_suffix = os.getenv("VERSION_SUFFIX", "")
 
 
 def get_extensions():
@@ -70,7 +72,7 @@ def get_extensions():
 
 setup(
     name=library_name,
-    version="0.0.1",
+    version="0.0.1" + version_suffix,
     author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),

@@ -1,8 +1,3 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-
 import os
 import glob
 
@@ -32,12 +27,10 @@ def get_extensions():
         "cxx": [
             "-O3" if not debug_mode else "-O0",
             "-fdiagnostics-color=always",
-            # "-w",
         ],
         "nvcc": [
             "-O3" if not debug_mode else "-O0",
             "--extended-lambda",
-            # "-w",
         ],
     }
     if debug_mode:
@@ -69,7 +62,7 @@ def get_extensions():
 
 setup(
     name=library_name,
-    version="0.0.2",
+    version="0.0.3",
     author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),
@@ -78,6 +71,6 @@ setup(
     description="PyTorch extension package for Bessel functions with arbitrary real order and complex inputs",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/pytorch/torch-bessel",
+    url="https://github.com/hchau630/torch-bessel",
     cmdclass={"build_ext": BuildExtension},
 )

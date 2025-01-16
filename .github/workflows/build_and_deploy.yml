@@ -2,22 +2,23 @@ name: Build and upload to PyPI
 
 on:
   workflow_dispatch:
-  # pull_request:
-  # push:
-  #   branches:
-  #     - main
+  pull_request:
+  push:
+    branches:
+      - main
   release:
     types:
       - published
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build cp${{ matrix.python-version }} wheel on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # macos-14 is apple silicon
         os: [ubuntu-latest, macos-14]
+        python-version: ["39", "310", "311", "312"]
 
     steps:
       - uses: actions/checkout@v4
@@ -25,26 +26,26 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         env:
-          CIBW_BUILD: cp*-macosx_arm64 cp*-manylinux_x86_64
-          CIBW_SKIP: cp313-*
+          CIBW_BUILD: cp${{ matrix.python-version }}-macosx_arm64 cp${{ matrix.python-version }}-manylinux_x86_64
           CIBW_BUILD_FRONTEND: build
           CIBW_BEFORE_ALL_LINUX: >
             yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo &&
             yum clean all &&
             yum -y install cuda-toolkit-12-4
           # https://github.com/pytorch/test-infra/blob/main/tools/pkg-helpers/pytorch_pkg_helpers/cuda.py
+          # not sure if all the variables are needed
           CIBW_ENVIRONMENT: CUDA_HOME=/usr/local/cuda CUDA_PATH=/usr/local/cuda CPATH=/usr/local/cuda/include:$CPATH TORCH_CUDA_ARCH_LIST="5.0+PTX;6.0;7.0;7.5;8.0;8.6;9.0" FORCE_CUDA=1
           CIBW_ENVIRONMENT_PASS_LINUX: CUDA_HOME CUDA_PATH CPATH TORCH_CUDA_ARCH_LIST FORCE_CUDA
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           # see https://github.com/pytorch/ao/blob/main/packaging/post_build_script.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             auditwheel repair --exclude libtorch.so --exclude libtorch_python.so --exclude libtorch_cuda.so --exclude libtorch_cpu.so --exclude libc10.so --exclude libc10_cuda.so --exclude libcudart.so.12 --exclude libcudart.so.11.0  -w {dest_dir} {wheel}
-          # CIBW_TEST_REQUIRES: pytest expecttest scipy
-          # CIBW_TEST_COMMAND: pytest {project}/tests
+          CIBW_TEST_REQUIRES: pytest expecttest scipy
+          CIBW_TEST_COMMAND: pytest {project}/tests
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.os }}-cp${{ matrix.python-version }}
           path: ./wheelhouse/*.whl
 
   upload_pypi:
@@ -52,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -61,5 +63,3 @@ jobs:
           merge-multiple: true
 
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          skip-existing: true

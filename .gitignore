@@ -64,7 +64,8 @@ compile_commands.json
 .vscode
 
 # asv
-.asv
+.asv/env/
+.asv/html/
 
 # pytest
 .pytest_cache

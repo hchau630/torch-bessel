@@ -1,0 +1,84 @@
+{
+    "benchmarks.ModifiedBesselK0BackwardCPU.time_modified_bessel_k0_backward_cpu": {
+        "code": "class ModifiedBesselK0BackwardCPU:\n    def time_modified_bessel_k0_backward_cpu(self, n, is_real, singularity, dtype):\n        self.out.backward()\n\n    def setup(self, n, is_real, singularity, dtype):\n        args = _setup(n, is_real, singularity, dtype, requires_grad=True)\n        self.out = torch_bessel.ops.modified_bessel_k0(*args).norm()",
+        "min_run_count": 2,
+        "name": "benchmarks.ModifiedBesselK0BackwardCPU.time_modified_bessel_k0_backward_cpu",
+        "number": 1,
+        "param_names": [
+            "n",
+            "is_real",
+            "singularity",
+            "dtype"
+        ],
+        "params": [
+            [
+                "10000",
+                "100000",
+                "1000000"
+            ],
+            [
+                "False",
+                "True"
+            ],
+            [
+                "None",
+                "0.0"
+            ],
+            [
+                "torch.float32",
+                "torch.float64"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "36c4ae3fc84f5ecb4aca41531b2c5bcfea2f44154b2d241d847adaf1ad0f4783",
+        "warmup_time": 0.0
+    },
+    "benchmarks.ModifiedBesselK0ForwardCPU.time_modified_bessel_k0_forward_cpu": {
+        "code": "class ModifiedBesselK0ForwardCPU:\n    def time_modified_bessel_k0_forward_cpu(\n        self, n, is_real, singularity, dtype, requires_grad\n    ):\n        torch_bessel.ops.modified_bessel_k0(*self.args)\n\n    def setup(self, n, is_real, singularity, dtype, requires_grad):\n        self.args = _setup(n, is_real, singularity, dtype, requires_grad)",
+        "min_run_count": 2,
+        "name": "benchmarks.ModifiedBesselK0ForwardCPU.time_modified_bessel_k0_forward_cpu",
+        "number": 0,
+        "param_names": [
+            "n",
+            "is_real",
+            "singularity",
+            "dtype",
+            "requires_grad"
+        ],
+        "params": [
+            [
+                "10000",
+                "100000",
+                "1000000"
+            ],
+            [
+                "False",
+                "True"
+            ],
+            [
+                "None",
+                "0.0"
+            ],
+            [
+                "torch.float32",
+                "torch.float64"
+            ],
+            [
+                "False",
+                "True"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "e7641cf05cbd8ad8235f808957d031a3ffc58de8dfc21839c7ae309f4958da0c",
+        "warmup_time": -1
+    },
+    "version": 2
+}

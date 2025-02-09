@@ -1,0 +1,9 @@
+{
+    "arch": "arm64",
+    "cpu": "Apple M1 Pro",
+    "machine": "macbook_pro_m1",
+    "num_cpu": "10",
+    "os": "macOS_13.2.1",
+    "ram": "32GB",
+    "version": 1
+}

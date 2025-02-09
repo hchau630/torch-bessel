@@ -49,7 +49,7 @@ class TestBesselK0(TestCase):
             [make_z(-350, 350, 75, dtype=torch.double)],
             [make_z(-50, 50, 75)],
             [make_z(-50, 50, 75), 1.0],
-            [make_z(-50, 50, 75), torch.randn((76, 151))],
+            [make_z(-50, 50, 75), torch.randn((76, 151), device=device)],
         ]
 
     def _test_correctness(self, device):

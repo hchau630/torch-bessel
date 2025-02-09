@@ -36,7 +36,6 @@ class ModifiedBesselK0ForwardCPU:
         torch_bessel.ops.modified_bessel_k0(*self.args)
 
 
-@skip_benchmark_if(not torch.cuda.is_available())
 class ModifiedBesselK0ForwardCUDA:
     params = (
         [10_000, 100_000, 1_000_000],
@@ -50,6 +49,7 @@ class ModifiedBesselK0ForwardCUDA:
     def setup(self, n, is_real, singularity, dtype, requires_grad):
         self.args = _setup(n, is_real, singularity, dtype, requires_grad, device="cuda")
 
+    @skip_benchmark_if(not torch.cuda.is_available())
     def time_modified_bessel_k0_forward_cuda(
         self, n, is_real, singularity, dtype, requires_grad
     ):
@@ -77,7 +77,6 @@ class ModifiedBesselK0BackwardCPU:
         self.out.backward()
 
 
-@skip_benchmark_if(not torch.cuda.is_available())
 class ModifiedBesselK0BackwardCUDA:
     warmup_time = 0.0  # for some reason backward is called multiple times if not 0
     number = 1  # Avoids calling backward multiple times
@@ -89,6 +88,7 @@ class ModifiedBesselK0BackwardCUDA:
     )
     param_names = ["n", "is_real", "singularity", "dtype"]
 
+    @skip_benchmark_if(not torch.cuda.is_available())
     def setup(self, n, is_real, singularity, dtype):
         args = _setup(n, is_real, singularity, dtype, requires_grad=True, device="cuda")
         self.out = torch_bessel.ops.modified_bessel_k0(*args).norm()

@@ -1,0 +1,9 @@
+{
+    "arch": "x86_64",
+    "cpu": "AMD EPYC 7662 64-Core Processor",
+    "machine": "axon-cluster",
+    "num_cpu": "64",
+    "os": "Linux 3.10.0-1160.108.1.el7.x86_64",
+    "ram": "528054712",
+    "version": 1
+}

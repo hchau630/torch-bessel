@@ -7,9 +7,12 @@ from scipy import special
 import torch_bessel
 
 
-def reference_modified_bessel_k0(z):
+def reference_modified_bessel_k0(z, singularity=None):
     device = z.device
-    return special.kv(0.0, z.detach().cpu()).to(device)
+    out = special.kv(0.0, z.detach().cpu()).to(device)
+    if singularity is not None:
+        out = out.where(z != 0, singularity)
+    return out
 
 
 class TestBesselK0(TestCase):
@@ -45,6 +48,8 @@ class TestBesselK0(TestCase):
         return [
             [make_z(-350, 350, 75, dtype=torch.double)],
             [make_z(-50, 50, 75)],
+            [make_z(-50, 50, 75), 1.0],
+            [make_z(-50, 50, 75), torch.randn((76, 151))],
         ]
 
     def _test_correctness(self, device):
@@ -61,7 +66,7 @@ class TestBesselK0(TestCase):
                 # ierr = 4, complete loss of significance
                 expected[args[0].abs() > 4194303.98419452] = torch.nan
                 # ierr = 2, overflow
-                mask = args[0].abs() < 1.1754944e-35
+                mask = (args[0].abs() < 1.1754944e-35) & (args[0] != 0)
                 if expected.dtype == torch.complex64:
                     expected[mask] = torch.nan
                     expected[mask & (args[0].imag == 0) & (args[0] != 0)] = torch.inf

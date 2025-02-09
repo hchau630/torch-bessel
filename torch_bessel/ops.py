@@ -1,4 +1,5 @@
 from pathlib import Path
+from numbers import Number
 
 import torch
 from torch import Tensor
@@ -17,32 +18,55 @@ torch.ops.load_library(so_files[0])
 
 class ModifiedBesselK0(torch.autograd.Function):
     @staticmethod
-    def forward(x):
-        return torch.special.modified_bessel_k0(x)
+    def forward(z, singularity):
+        if not z.is_complex():
+            out = (torch.special.modified_bessel_k0(z), None)
+        elif not z.requires_grad:
+            out = (
+                torch.ops.torch_bessel.modified_bessel_k0_complex_forward.default(z),
+                None,
+            )
+        else:
+            out = torch.ops.torch_bessel.modified_bessel_k0_complex_forward_backward.default(
+                z
+            )
+
+        if singularity is None:
+            return (*out, None)
+
+        mask = z != 0
+        return (out[0].where(mask, singularity), out[1], mask)
 
     @staticmethod
-    def setup_context(ctx, inputs, _):
+    def setup_context(ctx, inputs, outputs):
+        if ctx.needs_input_grad[1]:
+            raise NotImplementedError("Gradient w.r.t. singularity is not implemented")
+
         if ctx.needs_input_grad[0]:
-            ctx.save_for_backward(*inputs)
+            if outputs[1] is None:
+                ctx.save_for_backward(inputs[0], None, outputs[2])
+            else:
+                ctx.save_for_backward(None, outputs[1], outputs[2])
+
         ctx.set_materialize_grads(False)
 
     @staticmethod
-    def backward(ctx, grad):
+    def backward(ctx, grad, _, __):
         if grad is None or not ctx.needs_input_grad[0]:
-            return None
+            return (None, None)
 
-        (x,) = ctx.saved_tensors
-        return -torch.special.modified_bessel_k1(x).mul_(grad)
+        x, deriv, mask = ctx.saved_tensors
+        if deriv is None:
+            out = -torch.special.modified_bessel_k1(x).mul_(grad)
+        else:
+            out = grad * deriv
+        if mask is not None:
+            out = out.where(mask, 0)
+        return (out, None)
 
 
-def modified_bessel_k0(z: Tensor) -> Tensor:
-    if not z.is_complex():
-        return ModifiedBesselK0.apply(z)
-    if not z.requires_grad:
-        return torch.ops.torch_bessel.modified_bessel_k0_complex_forward.default(z)
-    return torch.ops.torch_bessel.modified_bessel_k0_complex_forward_backward.default(
-        z
-    )[0]
+def modified_bessel_k0(z: Tensor, singularity: Number | Tensor | None = None) -> Tensor:
+    return ModifiedBesselK0.apply(z, singularity)[0]
 
 
 @torch.library.register_fake("torch_bessel::modified_bessel_k0_complex_forward")

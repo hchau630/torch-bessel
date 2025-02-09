@@ -37,6 +37,44 @@
         "version": "36c4ae3fc84f5ecb4aca41531b2c5bcfea2f44154b2d241d847adaf1ad0f4783",
         "warmup_time": 0.0
     },
+    "benchmarks.ModifiedBesselK0BackwardCUDA.time_modified_bessel_k0_backward_cuda": {
+        "code": "class ModifiedBesselK0BackwardCUDA:\n    @skip_benchmark_if(not torch.cuda.is_available())\n    def time_modified_bessel_k0_backward_cuda(self, n, is_real, singularity, dtype):\n        torch.cuda.synchronize()\n        self.out.backward()\n        torch.cuda.synchronize()\n\n    def setup(self, n, is_real, singularity, dtype):\n        args = _setup(n, is_real, singularity, dtype, requires_grad=True, device=\"cuda\")\n        self.out = torch_bessel.ops.modified_bessel_k0(*args).norm()",
+        "min_run_count": 2,
+        "name": "benchmarks.ModifiedBesselK0BackwardCUDA.time_modified_bessel_k0_backward_cuda",
+        "number": 1,
+        "param_names": [
+            "n",
+            "is_real",
+            "singularity",
+            "dtype"
+        ],
+        "params": [
+            [
+                "10000",
+                "100000",
+                "1000000"
+            ],
+            [
+                "False",
+                "True"
+            ],
+            [
+                "None",
+                "0.0"
+            ],
+            [
+                "torch.float32",
+                "torch.float64"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "8f0ed9786c4da96d8afc9238c7f94f5a5a05f879a9692779cb6c1f1b1e4a6512",
+        "warmup_time": 0.0
+    },
     "benchmarks.ModifiedBesselK0ForwardCPU.time_modified_bessel_k0_forward_cpu": {
         "code": "class ModifiedBesselK0ForwardCPU:\n    def time_modified_bessel_k0_forward_cpu(\n        self, n, is_real, singularity, dtype, requires_grad\n    ):\n        torch_bessel.ops.modified_bessel_k0(*self.args)\n\n    def setup(self, n, is_real, singularity, dtype, requires_grad):\n        self.args = _setup(n, is_real, singularity, dtype, requires_grad)",
         "min_run_count": 2,
@@ -78,6 +116,49 @@
         "type": "time",
         "unit": "seconds",
         "version": "e7641cf05cbd8ad8235f808957d031a3ffc58de8dfc21839c7ae309f4958da0c",
+        "warmup_time": -1
+    },
+    "benchmarks.ModifiedBesselK0ForwardCUDA.time_modified_bessel_k0_forward_cuda": {
+        "code": "class ModifiedBesselK0ForwardCUDA:\n    @skip_benchmark_if(not torch.cuda.is_available())\n    def time_modified_bessel_k0_forward_cuda(\n        self, n, is_real, singularity, dtype, requires_grad\n    ):\n        torch.cuda.synchronize()\n        torch_bessel.ops.modified_bessel_k0(*self.args)\n        torch.cuda.synchronize()\n\n    def setup(self, n, is_real, singularity, dtype, requires_grad):\n        self.args = _setup(n, is_real, singularity, dtype, requires_grad, device=\"cuda\")",
+        "min_run_count": 2,
+        "name": "benchmarks.ModifiedBesselK0ForwardCUDA.time_modified_bessel_k0_forward_cuda",
+        "number": 0,
+        "param_names": [
+            "n",
+            "is_real",
+            "singularity",
+            "dtype",
+            "requires_grad"
+        ],
+        "params": [
+            [
+                "10000",
+                "100000",
+                "1000000"
+            ],
+            [
+                "False",
+                "True"
+            ],
+            [
+                "None",
+                "0.0"
+            ],
+            [
+                "torch.float32",
+                "torch.float64"
+            ],
+            [
+                "False",
+                "True"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "9a8b94035dddf71c3279d969c4569447a2165c0a69fd566de8eaad365ff1a57d",
         "warmup_time": -1
     },
     "version": 2

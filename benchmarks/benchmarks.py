@@ -88,11 +88,11 @@ class ModifiedBesselK0BackwardCUDA:
     )
     param_names = ["n", "is_real", "singularity", "dtype"]
 
-    @skip_benchmark_if(not torch.cuda.is_available())
     def setup(self, n, is_real, singularity, dtype):
         args = _setup(n, is_real, singularity, dtype, requires_grad=True, device="cuda")
         self.out = torch_bessel.ops.modified_bessel_k0(*args).norm()
 
+    @skip_benchmark_if(not torch.cuda.is_available())
     def time_modified_bessel_k0_backward_cuda(self, n, is_real, singularity, dtype):
         torch.cuda.synchronize()
         self.out.backward()

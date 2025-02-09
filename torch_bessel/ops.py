@@ -1,5 +1,6 @@
 from pathlib import Path
 from numbers import Number
+from typing import Union
 
 import torch
 from torch import Tensor
@@ -65,7 +66,9 @@ class ModifiedBesselK0(torch.autograd.Function):
         return (out, None)
 
 
-def modified_bessel_k0(z: Tensor, singularity: Number | Tensor | None = None) -> Tensor:
+def modified_bessel_k0(
+    z: Tensor, singularity: Union[Number, Tensor, None] = None
+) -> Tensor:
     return ModifiedBesselK0.apply(z, singularity)[0]
 
 

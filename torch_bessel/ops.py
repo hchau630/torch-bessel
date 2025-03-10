@@ -65,6 +65,26 @@ class ModifiedBesselK0(torch.autograd.Function):
             out = out.where(mask, 0)
         return (out, None)
 
+    @staticmethod
+    def vmap(info, in_dims, z, singularity):
+        if singularity is None and in_dims[1] is not None:
+            raise ValueError("in_dims[1] must be None if singularity is not provided.")
+
+        if in_dims[0] is not None:
+            z = z.movedim(in_dims[0], 0)
+
+        if in_dims[1] is not None:
+            singularity = singularity.movedim(in_dims[1], 0)
+
+        out = ModifiedBesselK0.apply(z, singularity)
+        out_dims = [0] * 3 if any(d is not None for d in in_dims) else [None] * 3
+        if out[1] is None:
+            out_dims[1] = None
+        if out[2] is None:
+            out_dims[2] = None
+
+        return (out, tuple(out_dims))
+
 
 def modified_bessel_k0(
     z: Tensor, singularity: Union[Number, Tensor, None] = None

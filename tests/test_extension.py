@@ -115,3 +115,24 @@ class TestBesselK0(TestCase):
     @pytest.mark.skipif(not torch.cuda.is_available(), reason="requires cuda")
     def test_opcheck_cuda(self):
         self._opcheck("cuda")
+
+
+@pytest.mark.parametrize(
+    "singularity, in_dims",
+    [
+        (None, (0, None)),
+        (0.0, (0, None)),
+        ((4, 3), (0, 1)),
+    ],
+)
+def test_vmap(singularity, in_dims):
+    z = torch.randn(3, 4).abs() + torch.randn(3, 4) * 1j
+    if isinstance(singularity, tuple):
+        singularity = torch.randn(singularity)
+    func = torch.func.vmap(torch_bessel.ops.modified_bessel_k0, in_dims=in_dims)
+    out = func(z, singularity)
+    if not isinstance(singularity, torch.Tensor):
+        expected = torch_bessel.ops.modified_bessel_k0(z, singularity)
+    else:
+        expected = torch_bessel.ops.modified_bessel_k0(z, singularity.t())
+    torch.testing.assert_close(out, expected)

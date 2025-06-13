@@ -28,6 +28,7 @@ class TestBesselK0(TestCase):
             [make_z(50, dtype=torch.double).real],
             [make_z(50)],
             [make_z(50).real],
+            # [torch.tensor(70.1162 + 89.0190j)],  problematic input, need to investigate
         ]
 
     def grid_inputs(self, device, *, requires_grad=False):

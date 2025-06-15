@@ -23,13 +23,18 @@ class TestBesselK0(TestCase):
             imag = torch.randn(size, **kwargs)
             return torch.complex(real, imag)
 
-        return [
+        out = [
             [make_z(50, dtype=torch.double)],
             [make_z(50, dtype=torch.double).real],
             [make_z(50)],
             [make_z(50).real],
             # [torch.tensor(70.1162 + 89.0190j)],  problematic input, need to investigate
         ]
+        if device == "cuda":
+            # half precision is only supported on CUDA
+            out.append(make_z(50, dtype=torch.half))
+
+        return out
 
     def grid_inputs(self, device, *, requires_grad=False):
         def make_z(*args, dtype=torch.float):
@@ -46,12 +51,16 @@ class TestBesselK0(TestCase):
             real, imag = real[:, None], imag[None, :]
             return torch.complex(real, imag)
 
-        return [
+        out = [
             [make_z(-350, 350, 75, dtype=torch.double)],
             [make_z(-50, 50, 75)],
             [make_z(-50, 50, 75), 1.0],
             [make_z(-50, 50, 75), torch.randn((76, 151), device=device)],
         ]
+        if device == "cuda":
+            # half precision is only supported on CUDA
+            out.append([make_z(-5, 5, 75, dtype=torch.half)])
+        return out
 
     def _test_correctness(self, device):
         samples = (
@@ -63,12 +72,12 @@ class TestBesselK0(TestCase):
         for args in samples:
             result = torch_bessel.ops.modified_bessel_k0(*args)
             expected = reference_modified_bessel_k0(*args)
-            if expected.dtype in {torch.float, torch.complex64}:
+            if expected.dtype in {torch.float, torch.cfloat, torch.chalf}:
                 # ierr = 4, complete loss of significance
                 expected[args[0].abs() > 4194303.98419452] = torch.nan
                 # ierr = 2, overflow
                 mask = (args[0].abs() < 1.1754944e-35) & (args[0] != 0)
-                if expected.dtype == torch.complex64:
+                if expected.is_complex():
                     expected[mask] = torch.nan
                     expected[mask & (args[0].imag == 0) & (args[0] != 0)] = torch.inf
                 else:

@@ -9,7 +9,10 @@ import torch_bessel
 
 def reference_modified_bessel_k0(z, singularity=None):
     device = z.device
-    out = special.kv(0.0, z.detach().cpu()).to(device)
+    dtype = z.dtype
+    if dtype is torch.chalf:
+        z = z.to(torch.cfloat)
+    out = special.kv(0.0, z.detach().cpu()).to(device).to(dtype)
     if singularity is not None:
         out = out.where(z != 0, singularity)
     return out
@@ -32,7 +35,7 @@ class TestBesselK0(TestCase):
         ]
         if device == "cuda":
             # half precision is only supported on CUDA
-            out.append(make_z(50, dtype=torch.half))
+            out.append([make_z(50, dtype=torch.half)])
 
         return out
 
@@ -54,6 +57,7 @@ class TestBesselK0(TestCase):
         out = [
             [make_z(-350, 350, 75, dtype=torch.double)],
             [make_z(-50, 50, 75)],
+            [make_z(-5, 5, 75)],
             [make_z(-50, 50, 75), 1.0],
             [make_z(-50, 50, 75), torch.randn((76, 151), device=device)],
         ]
@@ -82,6 +86,9 @@ class TestBesselK0(TestCase):
                     expected[mask & (args[0].imag == 0) & (args[0] != 0)] = torch.inf
                 else:
                     expected[mask & (args[0] != 0)] = torch.inf
+            if expected.ndim == 2:
+                print(result[57:61,0:4])
+                print(expected[57:61,0:4])
             torch.testing.assert_close(result, expected, equal_nan=True)
 
     def test_correctness_cpu(self):

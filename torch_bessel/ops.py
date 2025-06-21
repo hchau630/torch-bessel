@@ -5,7 +5,7 @@ from typing import Union
 import torch
 from torch import Tensor
 
-__all__ = ["modified_bessel_k0"]
+__all__ = ["modified_bessel_k0", "modified_bessel_k1"]
 
 # load C extension before calling torch.library API, see
 # https://pytorch.org/tutorials/advanced/cpp_custom_ops.html
@@ -92,6 +92,13 @@ def modified_bessel_k0(
     return ModifiedBesselK0.apply(z, singularity)[0]
 
 
+def modified_bessel_k1(z: Tensor) -> Tensor:
+    # non-differentiable for now
+    if not z.is_complex():
+        return torch.special.modified_bessel_k1(z)
+    return torch.ops.torch_bessel.modified_bessel_k1_complex_forward.default(z)
+
+
 @torch.library.register_fake("torch_bessel::modified_bessel_k0_complex_forward")
 def _(z):
     return torch.empty_like(z)
@@ -102,6 +109,11 @@ def _(z):
 )
 def _(z):
     return torch.empty_like(z), torch.empty_like(z)
+
+
+@torch.library.register_fake("torch_bessel::modified_bessel_k1_complex_forward")
+def _(z):
+    return torch.empty_like(z)
 
 
 def modified_bessel_k0_backward(ctx, grad, _):

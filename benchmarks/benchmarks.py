@@ -17,6 +17,17 @@ def _setup(
     return args
 
 
+def _setup_k1(n, is_real, dtype=torch.float, device="cpu"):
+    kwargs = {"dtype": dtype, "device": device}
+    real = torch.randn(n, **kwargs).abs()
+    if is_real:
+        args = (real,)
+    else:
+        imag = torch.randn(n, **kwargs)
+        args = (torch.complex(real, imag),)
+    return args
+
+
 class ModifiedBesselK0ForwardCPU:
     params = (
         [10_000, 100_000, 1_000_000],
@@ -96,4 +107,37 @@ class ModifiedBesselK0BackwardCUDA:
     def time_modified_bessel_k0_backward_cuda(self, n, is_real, singularity, dtype):
         torch.cuda.synchronize()
         self.out.backward()
+        torch.cuda.synchronize()
+
+
+class ModifiedBesselK1ForwardCPU:
+    params = (
+        [10_000, 100_000, 1_000_000],
+        [False, True],
+        [torch.float32, torch.float64],
+    )
+    param_names = ["n", "is_real", "dtype"]
+
+    def setup(self, n, is_real, dtype):
+        self.args = _setup_k1(n, is_real, dtype)
+
+    def time_modified_bessel_k1_forward_cpu(self, n, is_real, dtype):
+        torch_bessel.ops.modified_bessel_k1(*self.args)
+
+
+class ModifiedBesselK1ForwardCUDA:
+    params = (
+        [10_000, 100_000, 1_000_000],
+        [False, True],
+        [torch.float32, torch.float64],
+    )
+    param_names = ["n", "is_real", "dtype"]
+
+    def setup(self, n, is_real, dtype):
+        self.args = _setup_k1(n, is_real, dtype, device="cuda")
+
+    @skip_benchmark_if(not torch.cuda.is_available())
+    def time_modified_bessel_k1_forward_cuda(self, n, is_real, dtype):
+        torch.cuda.synchronize()
+        torch_bessel.ops.modified_bessel_k1(*self.args)
         torch.cuda.synchronize()

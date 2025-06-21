@@ -49,3 +49,24 @@ inline C10_HOST_DEVICE void modified_bessel_k0_complex_forward_backward(c10::com
 
     return;
 }
+
+template <typename T>
+inline C10_HOST_DEVICE c10::complex<T> modified_bessel_k1_complex_forward(c10::complex<T> z) {
+    c10::complex<T> cy[2];
+    cy[1] = c10::complex<T>(NAN, NAN);
+    if (std::isnan(std::real(z)) || isnan(std::imag(z))) {
+        return cy[1];
+    }
+
+    int ierr;
+    amos::besk0(z, 2, cy, &ierr);
+
+    if (ierr == 2) {
+        if (std::real(z) >= 0 && std::imag(z) == 0) {
+            /* overflow */
+            cy[1] = INFINITY;
+        }
+    }
+
+    return cy[1];
+}

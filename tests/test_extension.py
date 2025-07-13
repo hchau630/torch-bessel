@@ -40,7 +40,7 @@ class TestBesselK0(TestCase):
             [make_z(50, dtype=torch.double).real],
             [make_z(50)],
             [make_z(50).real],
-            # [torch.tensor(70.1162 + 89.0190j)],  # problematic input, need to investigate
+            [torch.tensor(70.1162 + 89.0190j)],  # used to fail on this input
         ]
         if device == "cuda":
             # half precision is only supported on CUDA
@@ -66,7 +66,8 @@ class TestBesselK0(TestCase):
         out = [
             [make_z(-350, 350, 75, dtype=torch.double)],
             [make_z(-50, 50, 75)],
-            # [make_z(-5, 5, 75)],  # problematic input, need to investigate
+            [make_z(-5, 5, 75, dtype=torch.double)],  # scipy is buggy on this input
+            [make_z(-5, 5, 75)],  # scipy is buggy on this input
             [make_z(-50, 50, 75), 1.0],
             [make_z(-50, 50, 75), torch.randn((76, 151), device=device)],
         ]
@@ -95,9 +96,16 @@ class TestBesselK0(TestCase):
                     expected[mask & (args[0].imag == 0) & (args[0] != 0)] = torch.inf
                 else:
                     expected[mask & (args[0] != 0)] = torch.inf
-            # if expected.ndim == 2:
-            #     print(result[57:61,0:4])
-            #     print(expected[57:61,0:4])
+            # fix scipy bug. See https://github.com/scipy/xsf/issues/46
+            if args[0].is_complex():
+                mask = (
+                    (args[0].real > 685)
+                    & (args[0].real < 690)
+                    & (args[0].imag.abs() > 685)
+                    & (args[0].imag.abs() < 1.1e5)
+                )
+                expected[mask] = 0.0  # scipy returns incorrect/NaN output
+
             torch.testing.assert_close(result, expected, equal_nan=True)
 
     def test_correctness_cpu(self):
@@ -177,7 +185,7 @@ class TestBesselK1(TestCase):
             [make_z(50, dtype=torch.double).real],
             [make_z(50)],
             [make_z(50).real],
-            # [torch.tensor(70.1162 + 89.0190j)],  # problematic input, need to investigate
+            [torch.tensor(70.1162 + 89.0190j)],  # used to fail on this input
         ]
         if device == "cuda":
             # half precision is only supported on CUDA
@@ -203,7 +211,8 @@ class TestBesselK1(TestCase):
         out = [
             [make_z(-350, 350, 75, dtype=torch.double)],
             [make_z(-50, 50, 75)],
-            # [make_z(-5, 5, 75)],  # problematic input, need to investigate
+            [make_z(-5, 5, 75, dtype=torch.double)],  # scipy is buggy on this input
+            [make_z(-5, 5, 75)],  # scipy is buggy on this input
         ]
         if device == "cuda":
             # half precision is only supported on CUDA
@@ -225,9 +234,15 @@ class TestBesselK1(TestCase):
                     expected[mask & (args[0].imag == 0) & (args[0] != 0)] = torch.inf
                 else:
                     expected[mask & (args[0] != 0)] = torch.inf
-            # if expected.ndim == 2:
-            #     print(result[57:61,0:4])
-            #     print(expected[57:61,0:4])
+            # fix scipy bug. See https://github.com/scipy/xsf/issues/46
+            if args[0].is_complex():
+                mask = (
+                    (args[0].real > 685)
+                    & (args[0].real < 690)
+                    & (args[0].imag.abs() > 685)
+                    & (args[0].imag.abs() < 1.1e5)
+                )
+                expected[mask] = 0.0  # scipy returns incorrect/NaN output
             torch.testing.assert_close(result, expected, equal_nan=True)
 
     def test_correctness_cpu(self):

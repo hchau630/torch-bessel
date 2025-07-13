@@ -465,7 +465,7 @@ inline C10_HOST_DEVICE int kscl0(
             continue;
         }
         cs = -zr + std::log(s1);
-        cs = (exp(std::real(cs))/tol)*(cos(std::imag(cs)) + sin(std::imag(cs)*c10::complex<T>(0, 1)));
+        cs = (exp(std::real(cs))/tol)*c10::complex<T>(cos(std::imag(cs)), sin(std::imag(cs)));
         if (!uchk(cs, ascle, tol)) {
             y[i-1] = cs;
             nz -= 1;

@@ -62,7 +62,7 @@ def get_extensions():
 
 setup(
     name=library_name,
-    version="0.0.7",
+    version="0.0.8",
     author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),

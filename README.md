@@ -6,6 +6,7 @@ Currently only supports Linux (with CUDA 12.4) or MacOS (Apple silicon, cpu only
 ```
 pip install torch-bessel
 ```
+UPDATE: it seems the package might no longer be compatible with the latest pytorch version (>= 2.12.0), so try installing an earlier version of pytorch if you encounter issues.
 
 # Example
 ```

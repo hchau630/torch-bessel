@@ -1,4 +1,5 @@
-#include <torch/extension.h>
+// #include <torch/extension.h>
+#include <torch/library.h>
 #include <ATen/TensorIterator.h>
 
 

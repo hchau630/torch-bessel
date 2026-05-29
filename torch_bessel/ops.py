@@ -1,4 +1,4 @@
-from pathlib import Path
+# from pathlib import Path
 from numbers import Number
 from typing import Union
 
@@ -7,14 +7,14 @@ from torch import Tensor
 
 __all__ = ["modified_bessel_k0", "modified_bessel_k1"]
 
-# load C extension before calling torch.library API, see
-# https://pytorch.org/tutorials/advanced/cpp_custom_ops.html
-so_dir = Path(__file__).parent
-so_files = list(so_dir.glob("_C*.so"))
-assert (
-    len(so_files) == 1
-), f"Expected one _C*.so file at {so_dir}, found {len(so_files)}"
-torch.ops.load_library(so_files[0])
+# # load C extension before calling torch.library API, see
+# # https://pytorch.org/tutorials/advanced/cpp_custom_ops.html
+# so_dir = Path(__file__).parent
+# so_files = list(so_dir.glob("_C*.so"))
+# assert len(so_files) == 1, (
+#     f"Expected one _C*.so file at {so_dir}, found {len(so_files)}"
+# )
+# torch.ops.load_library(so_files[0])
 
 
 class ModifiedBesselK0(torch.autograd.Function):

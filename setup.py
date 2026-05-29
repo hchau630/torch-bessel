@@ -26,7 +26,9 @@ def get_extensions():
     extra_compile_args = {
         "cxx": [
             "-O3" if not debug_mode else "-O0",
+            "-std=c++17",
             "-fdiagnostics-color=always",
+            "-DPy_LIMITED_API=0x030A0000",
         ],
         "nvcc": [
             "-O3" if not debug_mode else "-O0",
@@ -54,6 +56,7 @@ def get_extensions():
             sources,
             extra_compile_args=extra_compile_args,
             extra_link_args=extra_link_args,
+            py_limited_api=True,
         )
     ]
 
@@ -62,15 +65,16 @@ def get_extensions():
 
 setup(
     name=library_name,
-    version="0.0.8",
+    version="0.0.9",
     author="Ho Yin Chau",
     packages=find_packages(),
     ext_modules=get_extensions(),
     install_requires=["torch"],
-    python_requires=">= 3.9",
+    python_requires=">= 3.10",
     description="PyTorch extension package for Bessel functions with arbitrary real order and complex inputs",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/hchau630/torch-bessel",
     cmdclass={"build_ext": BuildExtension},
+    options={"bdist_wheel": {"py_limited_api": "cp310"}},
 )

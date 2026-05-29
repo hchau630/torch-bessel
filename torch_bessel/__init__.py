@@ -1,5 +1,7 @@
 import warnings
-from . import ops
+
+# from . import ops
+from . import _C, ops
 
 # Silence warning emitted at torch/nested/_internal/nested_tensor.py:417
 warnings.filterwarnings(

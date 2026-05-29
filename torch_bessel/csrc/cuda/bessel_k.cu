@@ -1,4 +1,6 @@
-#include <torch/extension.h>
+// #include <torch/extension.h>
+#include <torch/library.h>
+#include <ATen/ATen.h>
 #include <ATen/TensorIterator.h>
 #include <ATen/native/cuda/Loops.cuh>
 #include <ATen/OpMathType.h>
@@ -16,7 +18,7 @@ namespace torch_bessel {
 at::Tensor modified_bessel_k0_complex_forward_cuda(const at::Tensor& z) {
   TORCH_INTERNAL_ASSERT(z.device().type() == at::DeviceType::CUDA);
   at::ScalarType dtype = z.scalar_type();
-  at::Tensor result = torch::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
+  at::Tensor result = at::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
   at::TensorIterator iter = build_iterator_11(result, z);
   AT_DISPATCH_COMPLEX_TYPES_AND(at::kComplexHalf, dtype, "modified_bessel_k0_complex_forward_cuda", [&]() {
     at::native::gpu_kernel(iter, []GPU_LAMBDA(scalar_t z) -> scalar_t {
@@ -30,8 +32,8 @@ at::Tensor modified_bessel_k0_complex_forward_cuda(const at::Tensor& z) {
 std::tuple<at::Tensor, at::Tensor> modified_bessel_k0_complex_forward_backward_cuda(const at::Tensor& z) {
   TORCH_INTERNAL_ASSERT(z.device().type() == at::DeviceType::CUDA);
   at::ScalarType dtype = z.scalar_type();
-  at::Tensor result1 = torch::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
-  at::Tensor result2 = torch::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
+  at::Tensor result1 = at::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
+  at::Tensor result2 = at::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
   at::TensorIterator iter = build_iterator_21(result1, result2, z);
   AT_DISPATCH_COMPLEX_TYPES_AND(at::kComplexHalf, dtype, "modified_bessel_k0_complex_forward_backward_cuda", [&]() {
     at::native::gpu_kernel_multiple_outputs(iter, []GPU_LAMBDA(scalar_t z) -> thrust::tuple<scalar_t, scalar_t> {
@@ -47,7 +49,7 @@ std::tuple<at::Tensor, at::Tensor> modified_bessel_k0_complex_forward_backward_c
 at::Tensor modified_bessel_k1_complex_forward_cuda(const at::Tensor& z) {
   TORCH_INTERNAL_ASSERT(z.device().type() == at::DeviceType::CUDA);
   at::ScalarType dtype = z.scalar_type();
-  at::Tensor result = torch::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
+  at::Tensor result = at::empty(at::IntArrayRef(), at::device(at::kCUDA).dtype(dtype)).resize_(0);
   at::TensorIterator iter = build_iterator_11(result, z);
   AT_DISPATCH_COMPLEX_TYPES_AND(at::kComplexHalf, dtype, "modified_bessel_k1_complex_forward_cuda", [&]() {
     at::native::gpu_kernel(iter, []GPU_LAMBDA(scalar_t z) -> scalar_t {

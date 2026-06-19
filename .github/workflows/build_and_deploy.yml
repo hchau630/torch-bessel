@@ -109,7 +109,7 @@ jobs:
             -w {dest_dir} {wheel}
           CIBW_BEFORE_TEST: |
             pip install --force-reinstall --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
-          CIBW_TEST_REQUIRES: pytest expecttest scipy
+          CIBW_TEST_REQUIRES: pytest expecttest scipy setuptools
           CIBW_TEST_COMMAND: pytest {project}/tests
 
       - name: Move wheels into S3 layout

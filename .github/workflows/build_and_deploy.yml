@@ -77,10 +77,11 @@ jobs:
           CIBW_BUILD: cp310-${{ matrix.platform }}
           CIBW_BUILD_FRONTEND: "build; args: --no-isolation"
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_BEFORE_ALL_LINUX: >
+          CIBW_BEFORE_ALL_LINUX: |
             if [ "${{ matrix.cuda_version }}" != "cpu" ]; then
-              yum-config-manager --add-repo ${{ matrix.cuda_repo }} &&
-              yum clean all &&
+              yum -y install yum-utils
+              yum-config-manager --add-repo ${{ matrix.cuda_repo }}
+              yum clean all
               yum -y install ${{ matrix.cuda_package }}
             fi
           # https://github.com/pytorch/test-infra/blob/main/tools/pkg-helpers/pytorch_pkg_helpers/cuda.py

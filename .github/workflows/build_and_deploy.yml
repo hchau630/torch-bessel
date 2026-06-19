@@ -28,6 +28,11 @@ jobs:
             torch_cuda_arch_list: "5.0;6.0;7.0;7.5;8.0;8.6;9.0"
             cuda_repo: https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
             cuda_package: cuda-toolkit-12-6
+            # annoyingly, manylinux_2_28 has gcc 14, which is not compatible with cuda 12.6.
+            # see: https://github.com/pytorch/pytorch/issues/152426
+            cc: /opt/rh/gcc-toolset-13/root/usr/bin/gcc
+            cxx: /opt/rh/gcc-toolset-13/root/usr/bin/g++
+            cudahostcxx: /opt/rh/gcc-toolset-13/root/usr/bin/g++
           - cuda_version: "cu128"
             torch_cuda_arch_list: "7.5;8.0;8.6;9.0;10.0;12.0+PTX"
             cuda_repo: https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
@@ -83,6 +88,10 @@ jobs:
               yum clean all
               yum -y install ${{ matrix.cuda_package }}
             fi
+
+            if [ "${{ matrix.cuda_version }}" = "cu126" ]; then
+              yum -y install gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
+            fi
           # https://github.com/pytorch/test-infra/blob/main/tools/pkg-helpers/pytorch_pkg_helpers/cuda.py
           # not sure if all the variables are needed
           CIBW_ENVIRONMENT: >
@@ -91,6 +100,9 @@ jobs:
             CPATH=/usr/local/cuda/include:$CPATH
             TORCH_CUDA_ARCH_LIST="${{ matrix.torch_cuda_arch_list }}"
             TORCH_INDEX_URL="https://download.pytorch.org/whl/${{ matrix.cuda_version }}"
+            CC="${{ matrix.cc }}"
+            CXX="${{ matrix.cxx }}"
+            CUDAHOSTCXX="${{ matrix.cudahostcxx }}"
           CIBW_BEFORE_BUILD: |
             pip install --upgrade pip setuptools wheel ninja
             pip install --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
@@ -109,6 +121,7 @@ jobs:
             -w {dest_dir} {wheel}
           CIBW_BEFORE_TEST: |
             pip install --force-reinstall --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
+          # setuptools required by `import from torch.testing._internal.common_utils import TestCase`
           CIBW_TEST_REQUIRES: pytest expecttest scipy setuptools
           CIBW_TEST_COMMAND: pytest {project}/tests
 

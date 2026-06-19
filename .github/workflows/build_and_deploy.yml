@@ -79,8 +79,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_BEFORE_ALL_LINUX: |
             if [ "${{ matrix.cuda_version }}" != "cpu" ]; then
-              yum -y install yum-utils
-              yum-config-manager --add-repo ${{ matrix.cuda_repo }}
+              curl "${{ matrix.cuda_repo }}" -o /etc/yum.repos.d/cuda.repo
               yum clean all
               yum -y install ${{ matrix.cuda_package }}
             fi
@@ -109,7 +108,7 @@ jobs:
             --exclude libcudart.so.11.0
             -w {dest_dir} {wheel}
           CIBW_BEFORE_TEST: |
-            pip install --force-reinstall "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
+            pip install --force-reinstall --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
           CIBW_TEST_REQUIRES: pytest expecttest scipy
           CIBW_TEST_COMMAND: pytest {project}/tests
 

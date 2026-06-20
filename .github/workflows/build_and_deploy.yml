@@ -33,6 +33,10 @@ jobs:
             cuda_repo: https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
             cuda_package: cuda-toolkit-12-8
           - os: ubuntu-latest
+            pytorch_version: 2.6.0
+            cuda_version: "cpu"
+            manylinux_image: manylinux2014
+          - os: ubuntu-latest
             platform: manylinux_x86_64
             pytorch_version: 2.6.0
             cuda_version: "cu124"

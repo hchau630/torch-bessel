@@ -1,6 +1,7 @@
 import warnings
 
-# from . import ops
+# need to import torch before importing torch_bessel._C
+import torch
 from . import _C, ops
 
 # Silence warning emitted at torch/nested/_internal/nested_tensor.py:417

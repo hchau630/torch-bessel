@@ -93,10 +93,11 @@ jobs:
             CUDA_PATH=/usr/local/cuda
             CPATH=/usr/local/cuda/include:$CPATH
             TORCH_CUDA_ARCH_LIST="${{ matrix.torch_cuda_arch_list }}"
-            TORCH_INDEX_URL="https://download.pytorch.org/whl/${{ matrix.cuda_version }}"
             CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
             CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
             CUDAHOSTCXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
+          CIBW_ENVIRONMENT: >
+            TORCH_INDEX_URL="https://download.pytorch.org/whl/${{ matrix.cuda_version }}"
           CIBW_BEFORE_BUILD: |
             pip install --upgrade pip setuptools wheel ninja
             pip install --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"

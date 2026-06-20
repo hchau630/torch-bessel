@@ -84,21 +84,23 @@ jobs:
               yum -y install ${{ matrix.cuda_package }}
             fi
             
-            if [ "${{ matrix.cuda_version }}" = "cu126" ]; then
+            if [ "${{ matrix.cuda_version }}" != "cpu" ] && [ "${{ matrix.manylinux_image }}" != "manylinux2014" ]; then
               yum -y install gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
             fi
           # https://github.com/pytorch/test-infra/blob/main/tools/pkg-helpers/pytorch_pkg_helpers/cuda.py
           # not sure if all the variables are needed
           # CC, CXX, CUDAHOSTCXX: manylinux_2_28 has gcc 14, which is not compatible with cuda 12.6.
-          # see: https://github.com/pytorch/pytorch/issues/152426
+          # See: https://github.com/pytorch/pytorch/issues/152426
+          # Furthermore, pytorch disallow gcc 14 with 12.8 for some older versions of pytorch.
+          # See: https://github.com/pytorch/pytorch/blob/main/torch/utils/cpp_extension.py
           CIBW_ENVIRONMENT_LINUX: >
             CUDA_HOME=/usr/local/cuda
             CUDA_PATH=/usr/local/cuda
             CPATH=/usr/local/cuda/include:$CPATH
             TORCH_CUDA_ARCH_LIST="${{ matrix.torch_cuda_arch_list }}"
-            CC="${{ matrix.cuda_version == 'cu126' && '/opt/rh/gcc-toolset-13/root/usr/bin/gcc' || 'gcc' }}"
-            CXX="${{ matrix.cuda_version == 'cu126' && '/opt/rh/gcc-toolset-13/root/usr/bin/g++' || 'g++' }}"
-            CUDAHOSTCXX="${{ matrix.cuda_version == 'cu126' && '/opt/rh/gcc-toolset-13/root/usr/bin/g++' || 'g++' }}"
+            CC="${{ matrix.cuda_version != 'cpu' && matrix.manylinux_image != 'manylinux2014' && '/opt/rh/gcc-toolset-13/root/usr/bin/gcc' || 'gcc' }}"
+            CXX="${{ matrix.cuda_version != 'cpu' && matrix.manylinux_image != 'manylinux2014' && '/opt/rh/gcc-toolset-13/root/usr/bin/g++' || 'g++' }}"
+            CUDAHOSTCXX="${{ matrix.cuda_version != 'cpu' && matrix.manylinux_image != 'manylinux2014' && '/opt/rh/gcc-toolset-13/root/usr/bin/g++' || 'g++' }}"
           CIBW_BEFORE_BUILD: |
             pip install --upgrade pip setuptools wheel ninja
             pip install --index-url "https://download.pytorch.org/whl/${{ matrix.cuda_version }}" "torch==${{ matrix.pytorch_version }}"

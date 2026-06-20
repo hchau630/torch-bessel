@@ -96,11 +96,9 @@ jobs:
             CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
             CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
             CUDAHOSTCXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
-          CIBW_ENVIRONMENT: >
-            TORCH_INDEX_URL="https://download.pytorch.org/whl/${{ matrix.cuda_version }}"
           CIBW_BEFORE_BUILD: |
             pip install --upgrade pip setuptools wheel ninja
-            pip install --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
+            pip install --index-url "https://download.pytorch.org/whl/${{ matrix.cuda_version }}" "torch==${{ matrix.pytorch_version }}"
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           # see https://github.com/pytorch/ao/blob/main/packaging/post_build_script.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
@@ -115,7 +113,7 @@ jobs:
             --exclude libcudart.so.11.0
             -w {dest_dir} {wheel}
           CIBW_BEFORE_TEST: |
-            pip install --force-reinstall --index-url "$TORCH_INDEX_URL" "torch==${{ matrix.pytorch_version }}"
+            pip install --force-reinstall --index-url "https://download.pytorch.org/whl/${{ matrix.cuda_version }}" "torch==${{ matrix.pytorch_version }}"
           # setuptools required by `import from torch.testing._internal.common_utils import TestCase`
           CIBW_TEST_REQUIRES: pytest expecttest scipy setuptools
           CIBW_TEST_COMMAND: pytest {project}/tests

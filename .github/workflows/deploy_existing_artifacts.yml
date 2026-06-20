@@ -1,0 +1,59 @@
+name: Deploy existing wheel artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "GitHub Actions run ID containing successful cibw-wheels-* artifacts"
+        required: true
+        type: string
+
+jobs:
+  upload_wheels:
+    name: Upload wheels to S3 bucket
+    runs-on: ubuntu-latest
+    # Need ID token write permission to use OIDC
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          run-id: ${{ inputs.run_id }}
+          pattern: cibw-wheels-*
+          path: dist
+          merge-multiple: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::175686757962:role/github-actions-s3-upload
+          aws-region: us-east-2
+
+      - name: Additional steps
+        run: |
+          aws s3 sync dist "s3://torch-bessel/whl"
+
+  publish_pypi:
+    name: Publish source distribution to PyPI
+    needs: [upload_wheels]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Build source distribution
+        run: |
+          python -m pip install build
+          python -m build --sdist
+
+      - name: Publish source distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
